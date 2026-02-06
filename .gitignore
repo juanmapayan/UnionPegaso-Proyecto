@@ -1,5 +1,5 @@
 # Logs
-logs
+logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
@@ -7,16 +7,38 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
+# Dependencies / builds
+node_modules/
+dist/
+dist-ssr/
+coverage/
+.angular/
+*.tsbuildinfo
+
+# Local env / secrets (no subir)
+.env
+.env.*
+!.env.example
+
+# Local overrides
 *.local
 
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
-.idea
+# (Opcional, si queréis compartir configuración)
+#!.vscode/settings.json
+#!.vscode/launch.json
+#!.vscode/tasks.json
+
+.idea/
+.history/
+
+# OS files
 .DS_Store
+Thumbs.db
+
+# Visual Studio / Windows
 *.suo
 *.ntvs*
 *.njsproj
