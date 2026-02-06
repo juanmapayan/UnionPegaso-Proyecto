@@ -26,8 +26,15 @@
           @for (item of items; track item.id) {
             <div class="flex-shrink-0 portfolio-card" [style.width.%]="100 / itemsPerView()">
               @if (item.type === 'image') {
-                <!-- Image Card -->
-                <div class="relative h-64 md:h-72 lg:h-80 rounded-xl overflow-hidden border border-white/10 group bg-[#0a0a0a]">
+                <!-- Image Card clickable -->
+                <div 
+                  class="relative h-64 md:h-72 lg:h-80 rounded-xl overflow-hidden border border-white/10 group bg-[#0a0a0a] cursor-pointer"
+                  role="button"
+                  tabindex="0"
+                  [attr.aria-label]="'Ver imagen: ' + item.title"
+                  (click)="onItemClick(item)"
+                  (keydown)="$event.key === 'Enter' && onItemClick(item)"
+                >
                   <img 
                     [src]="item.src" 
                     [alt]="item.title"
@@ -50,45 +57,44 @@
                   </div>
                 </div>
               } @else if (item.type === 'video') {
-                <!-- Video Card -->
+                <!-- Video Poster Card (vertical 9:16) -->
                 <div 
-                  class="relative h-64 md:h-72 lg:h-80 rounded-xl overflow-hidden border border-white/10 group bg-[#0a0a0a] cursor-pointer"
-                  (click)="openVideoModal(item)"
-                  (keydown)="$event.key === 'Enter' && openVideoModal(item)"
+                  class="video-poster-card group" 
                   role="button"
                   tabindex="0"
                   [attr.aria-label]="'Ver video: ' + item.title"
+                  (click)="onItemClick(item)"
+                  (keydown)="$event.key === 'Enter' && onItemClick(item)"
+                  (mouseenter)="triggerPosterGeneration(item)"
                 >
-                  <img 
-                    [src]="item.poster || item.src" 
-                    [alt]="item.title"
-                    class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  >
-                  <!-- Play Button Overlay -->
-                  <div class="absolute inset-0 bg-black/30 group-hover:bg-black/50 transition-colors duration-300 flex items-center justify-center">
-                    <div class="w-16 h-16 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center group-hover:bg-white/20 transition-all duration-300">
-                      <svg class="w-8 h-8 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M8 5v14l11-7z"/>
-                      </svg>
+                  <div class="poster-frame" [class.loading]="isPosterLoading(item)">
+                    @if (getPosterForItem(item); as poster) {
+                      <img [src]="poster" [alt]="item.title" loading="lazy" />
+                    } @else {
+                      <div class="poster-skeleton"></div>
+                    }
+                    <div class="play-overlay">
+                      <div class="play-circle">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                          <path d="M8 5v14l11-7z" fill="currentColor"></path>
+                        </svg>
+                      </div>
                     </div>
                   </div>
-                  <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
-                    <div class="bg-gradient-to-t from-black/80 via-transparent to-transparent absolute inset-0 pointer-events-none"></div>
-                    <div class="relative z-10">
-                      <h3 class="text-white font-bold text-lg mb-2">{{ item.title }}</h3>
-                      @if (item.description) {
-                        <p class="text-gray-300 text-sm mb-3">{{ item.description }}</p>
-                      }
-                      @if (item.tags && item.tags.length) {
-                        <div class="flex gap-2 flex-wrap">
-                          @for (tag of item.tags; track tag) {
-                            <span class="px-2 py-1 text-xs bg-purple-500/20 text-purple-300 rounded">
-                              {{ tag }}
-                            </span>
-                          }
-                        </div>
-                      }
-                    </div>
+                  <div class="video-meta">
+                    <h3 class="text-white font-bold text-lg mb-1">{{ item.title }}</h3>
+                    @if (item.description) {
+                      <p class="text-gray-400 text-sm line-clamp-2">{{ item.description }}</p>
+                    }
+                    @if (item.tags && item.tags.length) {
+                      <div class="flex gap-2 flex-wrap mt-2">
+                        @for (tag of item.tags; track tag) {
+                          <span class="px-2 py-1 text-xs bg-purple-500/20 text-purple-300 rounded">
+                            {{ tag }}
+                          </span>
+                        }
+                      </div>
+                    }
                   </div>
                 </div>
               }
@@ -153,57 +159,4 @@
       </button>
     </div>
   </div>
-
-  <!-- Video Modal -->
-  @if (selectedVideoItem()) {
-    <div 
-      class="modal-overlay"
-      role="dialog"
-      aria-modal="true"
-      (click)="onModalOverlayClick($event)"
-      (keydown)="onKeyDown($event)"
-      tabindex="-1"
-    >
-      <div class="modal-panel max-w-2xl" (click)="$event.stopPropagation()">
-        <!-- Close Button -->
-        <button 
-          (click)="closeVideoModal()"
-          class="absolute top-4 right-4 z-50 p-2 rounded-lg bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-colors"
-          aria-label="Cerrar"
-        >
-          <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-          </svg>
-        </button>
-
-        <!-- Video -->
-        <div class="relative w-full pt-[56.25%]">
-          <video 
-            [src]="selectedVideoItem()?.src"
-            [poster]="selectedVideoItem()?.poster"
-            controls
-            class="absolute top-0 left-0 w-full h-full rounded-lg"
-            autoplay
-          ></video>
-        </div>
-
-        <!-- Info -->
-        <div class="mt-6">
-          <h3 class="text-2xl font-bold text-white mb-2">{{ selectedVideoItem()?.title }}</h3>
-          @if (selectedVideoItem()?.description) {
-            <p class="text-gray-400 mb-4">{{ selectedVideoItem()?.description }}</p>
-          }
-          @if ((selectedVideoItem()?.tags?.length ?? 0) > 0) {
-            <div class="flex gap-2 flex-wrap">
-              @for (tag of (selectedVideoItem()?.tags || []); track tag) {
-                <span class="px-3 py-1 text-sm bg-purple-500/10 text-purple-300 border border-purple-500/20 rounded">
-                  {{ tag }}
-                </span>
-              }
-            </div>
-          }
-        </div>
-      </div>
-    </div>
-  }
 </div>

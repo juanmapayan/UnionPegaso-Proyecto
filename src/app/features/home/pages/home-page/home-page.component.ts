@@ -4,6 +4,8 @@ import { ServicesPreviewComponent } from '../../components/services-preview/serv
 import { TrustSectionComponent } from '../../components/trust-section/trust-section.component';
 import { HowWeWorkComponent } from '../../components/how-we-work/how-we-work.component';
 import { PortfolioCarouselComponent } from '../../components/portfolio-carousel/portfolio-carousel.component';
+import { PortfolioModalComponent } from '../../components/portfolio-modal/portfolio-modal.component';
+import { PortfolioItem } from '../../data/portfolio.data';
 import { CasesListComponent } from '../../../case-studies/components/cases-list/cases-list.component';
 import { ContactInfoComponent } from '../../../contact/components/contact-info/contact-info.component';
 import { QuoteFormComponent, ScrollRevealDirective } from '@shared';
@@ -11,7 +13,18 @@ import { QuoteFormComponent, ScrollRevealDirective } from '@shared';
 @Component({
   selector: 'app-home-page',
   standalone: true,
-  imports: [HeroComponent, ServicesPreviewComponent, TrustSectionComponent, HowWeWorkComponent, PortfolioCarouselComponent, CasesListComponent, ContactInfoComponent, QuoteFormComponent, ScrollRevealDirective],
+  imports: [
+    HeroComponent, 
+    ServicesPreviewComponent, 
+    TrustSectionComponent, 
+    HowWeWorkComponent, 
+    PortfolioCarouselComponent,
+    PortfolioModalComponent,
+    CasesListComponent, 
+    ContactInfoComponent, 
+    QuoteFormComponent, 
+    ScrollRevealDirective
+  ],
   template: `
     <!-- Hero Principal -->
     <app-hero></app-hero>
@@ -52,7 +65,7 @@ import { QuoteFormComponent, ScrollRevealDirective } from '@shared';
     
     <!-- Portfolio Carousel Section -->
     <div appScrollReveal [delay]="100">
-      <app-portfolio-carousel></app-portfolio-carousel>
+      <app-portfolio-carousel (openItem)="handleOpenPortfolioItem($event)"></app-portfolio-carousel>
     </div>
     
     <!-- Visual Separator -->
@@ -84,10 +97,19 @@ import { QuoteFormComponent, ScrollRevealDirective } from '@shared';
         </div>
       </div>
     }
+
+    <!-- Portfolio Modal -->
+    <app-portfolio-modal
+      [isOpen]="isPortfolioModalOpen()"
+      [item]="selectedPortfolioItem()"
+      (closed)="handleClosePortfolioModal()"
+    ></app-portfolio-modal>
   `
 })
 export class HomePageComponent {
   showQuoteModal = signal(false);
+  isPortfolioModalOpen = signal(false);
+  selectedPortfolioItem = signal<PortfolioItem | null>(null);
 
   openQuote() {
     this.showQuoteModal.set(true);
@@ -95,5 +117,15 @@ export class HomePageComponent {
 
   closeQuote() {
     this.showQuoteModal.set(false);
+  }
+
+  handleOpenPortfolioItem(item: PortfolioItem) {
+    this.selectedPortfolioItem.set(item);
+    this.isPortfolioModalOpen.set(true);
+  }
+
+  handleClosePortfolioModal() {
+    this.isPortfolioModalOpen.set(false);
+    this.selectedPortfolioItem.set(null);
   }
 }

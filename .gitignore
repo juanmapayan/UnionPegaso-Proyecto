@@ -26,10 +26,16 @@ coverage/
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
+<<<<<<< Updated upstream
 # (Opcional, si queréis compartir configuración)
 #!.vscode/settings.json
 #!.vscode/launch.json
 #!.vscode/tasks.json
+=======
+!.vscode/settings.json
+!.vscode/launch.json
+!.vscode/tasks.json
+>>>>>>> Stashed changes
 
 .idea/
 .history/
