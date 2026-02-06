@@ -4,6 +4,7 @@ export interface PortfolioItem {
   type: 'image' | 'video';
   src: string;
   poster?: string;
+  orientation?: 'vertical' | 'horizontal';
   category: string;
   description?: string;
   year?: number;
@@ -12,65 +13,105 @@ export interface PortfolioItem {
 
 export const PORTFOLIO_ITEMS: PortfolioItem[] = [
   {
-    id: 'case-1',
-    title: 'Campanya SEO E-commerce',
-    type: 'image',
-    src: '/assets/portfolio/case-1.webp',
-    category: 'SEO',
-    description: 'Aumento del 150% en tráfico orgánico',
-    year: 2024,
-    tags: ['SEO', 'E-commerce', 'Ranking']
-  },
-  {
-    id: 'case-2',
-    title: 'Campaña Paid Media SaaS',
+    id: 'alvaro-spot',
+    title: 'Spot ALVARO',
     type: 'video',
-    src: '/assets/portfolio/campaign-saas.mp4',
-    poster: '/assets/portfolio/campaign-saas-poster.webp',
-    category: 'Publicidad',
-    description: 'Estrategia multicanal con ROAS 4.5x',
-    year: 2024,
-    tags: ['PPC', 'Google Ads', 'ROI']
+    src: '/assets/portafolio/ALVARO 0115.mp4',
+    orientation: 'vertical',
+    category: 'Video',
+    description: 'Pieza audiovisual con enfoque en marca personal y narrativa visual.',
+    year: 2026,
+    tags: ['Spot', 'Branding', 'Storytelling']
   },
   {
-    id: 'case-3',
-    title: 'Rediseño Web B2B',
+    id: 'sergii-spot',
+    title: 'Spot SERGII',
+    type: 'video',
+    src: '/assets/portafolio/SERGII 0121 (1).mp4',
+    orientation: 'vertical',
+    category: 'Video',
+    description: 'Spot dinámico orientado a conversión con ritmo ágil.',
+    year: 2026,
+    tags: ['Video Ads', 'Performance', 'Creativo']
+  },
+  {
+    id: 'mock-01',
+    title: 'Diseño de Landing 01',
     type: 'image',
-    src: '/assets/portfolio/web-redesign-b2b.webp',
+    src: '/assets/portafolio/WhatsApp Image 2026-01-22 at 15.43.07.jpeg',
     category: 'Diseño Web',
-    description: 'Nuevo sitio con conversión +35%',
-    year: 2024,
-    tags: ['UX/UI', 'Conversión', 'B2B']
+    description: 'Landing visual centrada en propuesta de valor y hero visual.',
+    year: 2026,
+    tags: ['UI', 'Landing', 'Conversión']
   },
   {
-    id: 'case-4',
-    title: 'Social Media Branding',
-    type: 'video',
-    src: '/assets/portfolio/social-campaign.mp4',
-    poster: '/assets/portfolio/social-campaign-poster.webp',
+    id: 'mock-02',
+    title: 'Diseño de Landing 02',
+    type: 'image',
+    src: '/assets/portafolio/WhatsApp Image 2026-01-22 at 15.43.07 (1).jpeg',
+    category: 'Diseño Web',
+    description: 'Variante de layout con foco en secciones de prueba social.',
+    year: 2026,
+    tags: ['UX', 'Secciones', 'Social Proof']
+  },
+  {
+    id: 'mock-03',
+    title: 'Creativo Social 01',
+    type: 'image',
+    src: '/assets/portafolio/WhatsApp Image 2026-01-22 at 15.52.20.jpeg',
     category: 'Redes Sociales',
-    description: 'Estrategia de contenido con 200K alcance',
-    year: 2023,
-    tags: ['Instagram', 'TikTok', 'Engagement']
+    description: 'Creativo vertical optimizado para paid social.',
+    year: 2026,
+    tags: ['Paid Social', 'Creativo', 'Vertical']
   },
   {
-    id: 'case-5',
-    title: 'Landing Page Conversión',
+    id: 'mock-04',
+    title: 'Creativo Social 02',
     type: 'image',
-    src: '/assets/portfolio/landing-page.webp',
-    category: 'Diseño Web',
-    description: 'Tasa de conversión 12% en 30 días',
-    year: 2023,
-    tags: ['CRO', 'Landing', 'Conversión']
+    src: '/assets/portafolio/WhatsApp Image 2026-01-22 at 15.52.21.jpeg',
+    category: 'Redes Sociales',
+    description: 'Iteración con énfasis en call-to-action destacado.',
+    year: 2026,
+    tags: ['CTA', 'Iteración', 'Social Ads']
   },
   {
-    id: 'case-6',
-    title: 'Email Marketing Automation',
+    id: 'mock-05',
+    title: 'Creativo Social 03',
     type: 'image',
-    src: '/assets/portfolio/email-campaign.webp',
-    category: 'Email Marketing',
-    description: 'Automatización con ROI 800%',
-    year: 2023,
-    tags: ['Email', 'Automation', 'Lead Generation']
+    src: '/assets/portafolio/WhatsApp Image 2026-01-22 at 15.52.21 (1).jpeg',
+    category: 'Redes Sociales',
+    description: 'Variación cromática para test A/B en campañas.',
+    year: 2026,
+    tags: ['A/B Test', 'Creativo', 'Performance']
+  },
+  {
+    id: 'mock-06',
+    title: 'Creativo Social 04',
+    type: 'image',
+    src: '/assets/portafolio/WhatsApp Image 2026-01-22 at 15.52.21 (2).jpeg',
+    category: 'Redes Sociales',
+    description: 'Versión enfocada en retención con visual limpio.',
+    year: 2026,
+    tags: ['Retención', 'Minimal', 'Social']
+  },
+  {
+    id: 'mock-07',
+    title: 'Creativo Social 05',
+    type: 'image',
+    src: '/assets/portafolio/WhatsApp Image 2026-01-22 at 15.57.54.jpeg',
+    category: 'Redes Sociales',
+    description: 'Creativo con jerarquía tipográfica marcada.',
+    year: 2026,
+    tags: ['Tipografía', 'Visual', 'Branding']
+  },
+  {
+    id: 'mock-08',
+    title: 'Creativo Social 06',
+    type: 'image',
+    src: '/assets/portafolio/WhatsApp Image 2026-01-22 at 15.57.54 (1).jpeg',
+    category: 'Redes Sociales',
+    description: 'Cierre de serie creativa para remarketing.',
+    year: 2026,
+    tags: ['Remarketing', 'Creativo', 'Serie']
   }
 ];
