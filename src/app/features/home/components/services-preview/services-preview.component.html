@@ -1,0 +1,89 @@
+<div id="servicios" class="py-24 bg-[#050505]">
+  <div class="container mx-auto px-6">
+    
+    <div class="mb-16">
+      <app-section-title
+        tag="Nuestros Servicios"
+        title="Todo lo que necesitas para escalar"
+        subtitle="Desde la estrategia inicial hasta la ejecución técnica, cubrimos todo el espectro digital."
+      ></app-section-title>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      @for (service of services; track service.id; let i = $index) {
+        <div appScrollReveal [delay]="i * 100" class="service-card group relative bg-gradient-to-br from-white/[0.07] to-white/[0.02] backdrop-blur-sm border border-white/10 rounded-2xl p-6 flex flex-col cursor-pointer">
+          
+          <!-- Header: Icon + Tags -->
+          <div class="flex items-start justify-between mb-4">
+            <div class="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center text-purple-400 group-hover:text-purple-300 group-hover:bg-purple-500/10 flex-shrink-0">
+              <app-svg-icon [name]="service.icon"></app-svg-icon>
+            </div>
+            <div class="flex gap-1.5">
+              @for (tag of service.tags; track tag) {
+                <span class="px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider bg-purple-500/10 text-purple-400 rounded border border-purple-500/20">
+                  {{ tag }}
+                </span>
+              }
+            </div>
+          </div>
+          
+          <!-- Title -->
+          <h4 class="text-xl font-bold text-white mb-2 group-hover:text-purple-100">
+            {{ service.title }}
+          </h4>
+          
+          <!-- Subtle gradient divider -->
+          <div class="h-px w-12 bg-gradient-to-r from-purple-500/50 to-transparent mb-3 group-hover:w-full service-divider"></div>
+          
+          <!-- Description -->
+          <p class="text-gray-400 text-sm leading-relaxed mb-4 group-hover:text-gray-300">
+            {{ service.description }}
+          </p>
+          
+          <!-- Result metric -->
+          <div class="mb-4 pb-4 border-b border-white/5">
+            <p class="text-xs text-gray-500 mb-1 uppercase tracking-wider">Resultados típicos</p>
+            <p class="text-sm text-purple-300 font-medium">{{ service.typicalResult }}</p>
+          </div>
+          
+          <!-- Premium bullet list -->
+          <ul class="space-y-2 mb-auto">
+            @for (item of service.bullets; track item) {
+              <li class="flex items-start text-sm text-gray-300 group-hover:text-gray-200">
+                <span class="inline-block w-1 h-1 rounded-full bg-purple-400 mt-2 mr-3 flex-shrink-0 group-hover:bg-purple-300 group-hover:scale-150"></span>
+                <span class="leading-relaxed">{{ item }}</span>
+              </li>
+            }
+          </ul>
+          
+          <!-- CTA at bottom -->
+          <div class="mt-6 pt-4 border-t border-white/5">
+            <button 
+              (click)="openServiceDetails(service)"
+              class="btn btn-link btn-sm">
+              <span>Ver detalles</span>
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+              </svg>
+            </button>
+          </div>
+          
+          <!-- Hover glow effect -->
+          <div class="absolute inset-0 rounded-2xl bg-purple-500/0 group-hover:bg-purple-500/5 pointer-events-none service-glow"></div>
+          
+        </div>
+      }
+    </div>
+
+    <div class="text-center mt-12">
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+        <a routerLink="/servicios" class="btn btn-secondary">
+          Ver todos los servicios
+        </a>
+        <button class="btn btn-primary btn-arrow" (click)="requestQuote.emit()">
+          Solicitar presupuesto rápido <span class="arrow">→</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
