@@ -1,5 +1,5 @@
 {
-  "name": "unión-pegaso---agencia-digital",
+  "name": "union-pegaso---agencia-digital",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -9,11 +9,8 @@
     "preview": "ng serve --configuration=production"
   },
   "dependencies": {
-    "@angular/build": "^21.1.0",
-    "@angular/cli": "^21.1.0",
     "@angular/common": "^21.1.0",
     "@angular/compiler": "^21.1.0",
-    "@angular/compiler-cli": "^21.1.0",
     "@angular/core": "^21.1.0",
     "@angular/forms": "^21.1.0",
     "@angular/platform-browser": "^21.1.0",
@@ -22,6 +19,9 @@
     "zone.js": "^0.16.0"
   },
   "devDependencies": {
+    "@angular/build": "^21.1.0",
+    "@angular/cli": "^21.1.0",
+    "@angular/compiler-cli": "^21.1.0",
     "@types/node": "^22.14.0",
     "autoprefixer": "^10.4.24",
     "postcss": "^8.5.6",
