@@ -1,4 +1,5 @@
 import { Injectable, signal } from '@angular/core';
+import { environment } from '../../../environments/environment';
 
 export interface AdminUser {
   email: string;
@@ -10,8 +11,10 @@ export interface AdminUser {
 })
 export class AuthService {
   private readonly ADMIN_EMAIL = 'unionpegaso@gmail.com';
-  private readonly ADMIN_PASSWORD = 'admin123'; // En producción, usar Supabase
-  
+  private readonly ADMIN_PASSWORD = environment.adminPassword; // Configured via environment
+
+  private readonly DEFAULT_MOCK_PASSWORD = 'admin123'; // REMOVE IN PRODUCTION
+
   currentUser = signal<AdminUser | null>(null);
   isAuthenticated = signal(false);
 
@@ -25,17 +28,24 @@ export class AuthService {
    */
   async login(email: string, password: string): Promise<void> {
     return new Promise((resolve, reject) => {
-      // Validación hardcodeada (reemplazar con Supabase en producción)
-      if (email === this.ADMIN_EMAIL && password === this.ADMIN_PASSWORD) {
+      // Bloquear login si mockAuthEnabled es falso y no есть backend real
+      if (!environment.mockAuthEnabled) {
+        reject(new Error('Autenticación deshabilitada en producción (falta configurar Supabase).'));
+        return;
+      }
+
+      const expectedPassword = this.ADMIN_PASSWORD || this.DEFAULT_MOCK_PASSWORD;
+
+      if (email === this.ADMIN_EMAIL && password === expectedPassword) {
         const token = this.generateToken();
         const user: AdminUser = { email, token };
-        
+
         sessionStorage.setItem('admin_token', token);
         sessionStorage.setItem('admin_user', JSON.stringify(user));
-        
+
         this.currentUser.set(user);
         this.isAuthenticated.set(true);
-        
+
         resolve();
       } else {
         reject(new Error('Credenciales inválidas. Email o contraseña incorrectos.'));
@@ -59,7 +69,7 @@ export class AuthService {
   private restoreSession(): void {
     const token = sessionStorage.getItem('admin_token');
     const userJson = sessionStorage.getItem('admin_user');
-    
+
     if (token && userJson) {
       try {
         const user = JSON.parse(userJson) as AdminUser;
