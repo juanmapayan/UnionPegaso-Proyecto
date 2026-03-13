@@ -1,0 +1,119 @@
+<div class="py-24 bg-[#050505] relative z-10">
+  <div class="container mx-auto px-6">
+    <!-- Header -->
+    <div class="mb-16">
+      <div class="inline-block mb-4">
+        <span
+          class="px-3 py-1 text-xs font-semibold uppercase tracking-widest text-purple-400 bg-purple-500/10 border border-purple-500/20 rounded-full">
+          Portfolio
+        </span>
+      </div>
+      <h2 class="text-4xl md:text-5xl font-bold text-white mb-4">
+        Trabajos recientes
+      </h2>
+      <p class="text-gray-400 text-lg max-w-2xl">
+        Proyectos exitosos que demuestran nuestro expertise en estrategia digital, diseño y ejecución.
+      </p>
+    </div>
+
+    <!-- Carousel -->
+    <div class="relative group/carousel">
+      <!-- Items Container -->
+      <div class="overflow-hidden p-1 -m-1 cursor-grab touch-action-pan-y select-none" (mousedown)="onDragStart($event)"
+        (touchstart)="onDragStart($event)" [style.cursor]="isDragging() ? 'grabbing' : 'grab'">
+        <!-- Padding para evitar recorte de sombras -->
+
+        <div class="flex gap-6 transition-transform ease-out will-change-transform"
+          [style.transitionDuration]="isDragging() ? '0ms' : '500ms'"
+          [style.transform]="'translateX(calc(-' + (currentIndex() * (100 / itemsPerView())) + '% - ' + (currentIndex() * 1.5) + 'rem + ' + dragOffset() + 'px))'">
+          @for (item of items; track item.id) {
+          <div class="flex-shrink-0" [style.width.%]="100 / itemsPerView()">
+
+            <!-- Unified Media Card -->
+            <div
+              class="media-frame group relative h-[320px] md:h-[360px] rounded-xl overflow-hidden bg-[#0a0a0a] border border-white/10 cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:border-purple-500/30"
+              tabindex="0" role="button" [attr.aria-label]="'Ver ' + item.title" (click)="onItemClick(item)"
+              (keydown.enter)="onItemClick(item)">
+              <!-- 1. Blurred Backdrop -->
+              <img [src]="getPosterForItem(item)" alt=""
+                class="absolute inset-0 w-full h-full object-cover opacity-60 blur-xl scale-110 transition-transform duration-700 group-hover:scale-125 select-none pointer-events-none">
+
+              <!-- 2. Dark Overlay -->
+              <div
+                class="absolute inset-0 bg-black/55 transition-opacity duration-300 group-hover:bg-black/40 pointer-events-none">
+              </div>
+
+              <!-- 3. Main Media Content -->
+              <div class="relative z-10 w-full h-full p-4 flex items-center justify-center pointer-events-none">
+                <img [src]="getPosterForItem(item)" [alt]="item.title"
+                  class="max-w-full max-h-full object-contain shadow-lg rounded-sm transition-transform duration-500 group-hover:scale-105 select-none"
+                  loading="lazy">
+
+                <!-- Play Icon Overlay (Video only) -->
+                @if (item.type === 'video') {
+                <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                  <div
+                    class="w-16 h-16 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white transition-all duration-300 group-hover:bg-purple-600/90 group-hover:scale-110">
+                    <svg class="w-8 h-8 ml-1" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M8 5v14l11-7z" />
+                    </svg>
+                  </div>
+                </div>
+                }
+              </div>
+
+              <!-- 4. Text Overlay / Meta -->
+              <div
+                class="absolute inset-0 z-20 flex flex-col justify-end p-6 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-0 translate-y-4 transition-all duration-300 group-hover:opacity-100 group-hover:translate-y-0 pointer-events-none">
+                <h3 class="text-white font-bold text-xl mb-1">{{ item.title }}</h3>
+                <p class="text-gray-300 text-sm mb-2 line-clamp-1">{{ item.category }}</p>
+                @if (item.tags) {
+                <div class="flex gap-2 flex-wrap">
+                  @for (tag of item.tags.slice(0, 2); track tag) {
+                  <span class="text-xs px-2 py-1 rounded bg-purple-500/20 text-purple-200 border border-purple-500/20">
+                    {{ tag }}
+                  </span>
+                  }
+                </div>
+                }
+              </div>
+            </div>
+
+          </div>
+          }
+        </div>
+      </div>
+
+      <!-- Navigation Buttons -->
+      <button (click)="prev()" aria-label="Anterior" title="Anterior"
+        class="absolute -left-4 lg:-left-12 top-1/2 -translate-y-1/2 hidden md:flex items-center justify-center w-10 h-10 rounded-full border border-white/10 bg-black/40 backdrop-blur-md text-white hover:bg-purple-600 hover:border-purple-500/50 hover:shadow-[0_0_15px_rgba(168,85,247,0.4)] transition-all z-30">
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+      </button>
+
+      <button (click)="next()" aria-label="Siguiente" title="Siguiente"
+        class="absolute -right-4 lg:-right-12 top-1/2 -translate-y-1/2 hidden md:flex items-center justify-center w-10 h-10 rounded-full border border-white/10 bg-black/40 backdrop-blur-md text-white hover:bg-purple-600 hover:border-purple-500/50 hover:shadow-[0_0_15px_rgba(168,85,247,0.4)] transition-all z-30">
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Dots Navigation -->
+    <div class="flex justify-center gap-2 mt-10">
+      @for (i of Array(dotCount()).fill(0); let index = $index; track index) {
+      <button (click)="goToSlide(index)" [attr.aria-label]="'Ir a página ' + (index + 1)"
+        class="w-2 h-2 rounded-full transition-all duration-300" [class.bg-purple-500]="currentIndex() === index"
+        [class.w-6]="currentIndex() === index" [class.bg-white-20]="currentIndex() !== index"
+        [style.backgroundColor]="currentIndex() !== index ? 'rgba(255,255,255,0.2)' : ''"></button>
+      }
+    </div>
+
+    <!-- Mobile Navigation -->
+    <div class="flex lg:hidden justify-center gap-4 mt-8">
+      <button (click)="prev()" class="btn btn-secondary btn-sm">← Anterior</button>
+      <button (click)="next()" class="btn btn-secondary btn-sm">Siguiente →</button>
+    </div>
+  </div>
+</div>
