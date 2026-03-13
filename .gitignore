@@ -1,6 +1,4 @@
-#
 # LOGS
-#
 logs/
 *.log
 npm-debug.log*
@@ -14,9 +12,14 @@ Frontend/build_log.txt
 Frontend/build_log_utf8.txt
 Frontend/errors.txt
 
-#
+# Documentación auxiliar generada durante desarrollo
+Frontend/ADMIN_COMPLETE_GUIDE.md
+Frontend/ADMIN_QUICK_FIX.md
+Frontend/ADMIN_SETUP.md
+Frontend/CLEANUP_REPORT.md
+Frontend/INTEGRATION_GUIDE.md
+
 # FRONTEND (Angular / Node)
-#
 Frontend/node_modules/
 Frontend/.angular/
 Frontend/dist/
@@ -48,9 +51,8 @@ Frontend/**/*.temp
 Frontend/*.clean
 Frontend/**/*.clean
 
-# 
 # BACKEND (PHP)
-# 
+
 Backend/vendor/
 
 # Entornos y configuración sensible
@@ -76,9 +78,7 @@ Backend/**/*.temp
 Backend/*.clean
 Backend/**/*.clean
 
-# 
-# ARCHIVOS DEL SISTEMA / EDITORES
-# 
+# EDITORES / SISTEMA
 .vscode/*
 !.vscode/extensions.json
 .idea/
@@ -93,17 +93,10 @@ Thumbs.db
 *.swp
 *.swo
 
-# 
-# ARCHIVOS GENERALES QUE NO INTERESA SUBIR
-# 
+# ARCHIVOS GENERALES
+
 *.pid
-*.seed
 *.pid.lock
 
-# GIT INTERNO / SUBMÓDULOS ACCIDENTALES
-
+# Evitar repositorios Git anidados accidentales
 **/.git
-Frontend/*GUIDE.md
-Frontend/*REPORT.md
-Frontend/ADMIN_*.md
-Frontend/INTEGRATION_*.md
