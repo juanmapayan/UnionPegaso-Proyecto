@@ -103,3 +103,7 @@ Thumbs.db
 # GIT INTERNO / SUBMÓDULOS ACCIDENTALES
 
 **/.git
+Frontend/*GUIDE.md
+Frontend/*REPORT.md
+Frontend/ADMIN_*.md
+Frontend/INTEGRATION_*.md
