@@ -1,0 +1,43 @@
+<div class="relative pt-40 pb-20 lg:pt-56 lg:pb-32 overflow-hidden">
+  
+  <!-- Abstract Background Glows with Animation (centered) -->
+  <div class="hero-glow hero-glow-main"></div>
+  <div class="hero-glow hero-glow-alt hero-glow-alt-1"></div>
+  <div class="hero-glow hero-glow-alt hero-glow-alt-2"></div>
+  
+  <div class="container mx-auto px-6 text-center">
+    <!-- Badge with Icon -->
+    <div class="mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      <ui-badge [dot]="true" [pulse]="true" icon="verified" variant="success" class="badge-glow">
+        <span class="uppercase tracking-wide">{{ badgeText }}</span>
+      </ui-badge>
+    </div>
+
+    <!-- Headline with staggered animation -->
+    <h1 class="text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight mb-6 leading-[1.1] animate-in fade-in slide-in-from-bottom-6 duration-1000 delay-100">
+      <span class="inline-block animate-text-reveal">Agencia de marketing digital enfocada en</span> <br class="hidden md:block" />
+      <span class="text-gradient text-glow inline-block animate-text-reveal-delayed">resultados reales</span>
+    </h1>
+
+    <!-- Subheadline -->
+    <p class="text-lg md:text-xl text-gray-400 max-w-2xl mx-auto mb-10 leading-relaxed animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-200">
+      Ayudamos a marcas ambiciosas a escalar mediante estrategias de growth, publicidad digital y desarrollo tecnológico de alto nivel.
+    </p>
+
+    <!-- Buttons -->
+    <div class="flex flex-col sm:flex-row items-center justify-center gap-4 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300">
+      <a routerLink="/presupuesto" class="btn btn-primary btn-lg btn-arrow">
+        Solicitar Presupuesto <span class="arrow">→</span>
+      </a>
+      <a routerLink="/servicios" class="btn btn-secondary btn-lg">
+        Explorar Servicios
+      </a>
+    </div>
+
+    <!-- Social Proof / Stats -->
+    <div class="mt-20 animate-in fade-in duration-1000 delay-500">
+      <app-stats [items]="stats" [centered]="true"></app-stats>
+    </div>
+
+  </div>
+</div>

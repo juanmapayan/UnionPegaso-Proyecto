@@ -1,0 +1,55 @@
+@if (isOpen && item) {
+  <div 
+    class="portfolio-modal-overlay"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-labelledby]="'modal-title-' + item.id"
+    (click)="onOverlayClick($event)"
+    (keydown)="onKeyDown($event)"
+    tabindex="-1"
+  >
+    <div class="portfolio-modal-panel" (click)="$event.stopPropagation()">
+      <!-- Close Button -->
+      <button 
+        (click)="closeModal()"
+        class="portfolio-modal-close"
+        aria-label="Cerrar modal"
+      >
+        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+
+      <!-- Media Content -->
+      @if (isVideo()) {
+        <div class="portfolio-modal-video-wrapper">
+          <video 
+            [src]="item.src"
+            [poster]="getPoster()"
+            controls
+            class="portfolio-modal-video"
+          ></video>
+        </div>
+      } @else {
+        <div class="portfolio-modal-image-wrapper">
+          <img [src]="item.src" [alt]="item.title" class="portfolio-modal-image" />
+        </div>
+      }
+
+      <!-- Info -->
+      <div class="portfolio-modal-info">
+        <h3 [id]="'modal-title-' + item.id" class="portfolio-modal-title">{{ item.title }}</h3>
+        @if (item.description) {
+          <p class="portfolio-modal-description">{{ item.description }}</p>
+        }
+        @if (item.tags && item.tags.length > 0) {
+          <div class="portfolio-modal-tags">
+            @for (tag of item.tags; track tag) {
+              <span class="portfolio-modal-tag">{{ tag }}</span>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+}
