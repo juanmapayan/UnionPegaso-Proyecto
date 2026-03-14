@@ -20,8 +20,7 @@ import { CommonModule } from '@angular/common';
         </div>
         
         <div class="mt-8 p-6 bg-yellow-500/10 border border-yellow-500/20 rounded-xl text-yellow-200">
-            <p>🚧 <strong>Panel de Administración (Fase 1)</strong>: Funcionalidades disponibles: Gestión de Servicios y Casos de Éxito.</p>
-        </div>
+        <p><strong>Panel corporativo inicial</strong>: aquí solo se gestiona el contenido público activo de la web: servicios y casos de éxito.</p>       
     </div>
   `
 })

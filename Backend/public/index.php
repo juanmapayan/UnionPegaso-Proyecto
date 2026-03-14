@@ -56,15 +56,6 @@ $serviceController = new ServiceController();
 $router->add('GET', 'api/services', [$serviceController, 'index']);
 $router->add('GET', 'api/services/{id}', [$serviceController, 'show']);
 
-require_once __DIR__ . '/../src/Controllers/PurchaseController.php';
-$purchaseController = new PurchaseController();
-$router->add('POST', 'api/purchases', [$purchaseController, 'create']);
-
-require_once __DIR__ . '/../src/Controllers/InvoiceController.php';
-$invoiceController = new InvoiceController();
-$router->add('GET', 'api/invoices', [$invoiceController, 'index']);
-$router->add('GET', 'api/invoices/{id}', [$invoiceController, 'show']);
-
 // --- Admin Routes ---
 require_once __DIR__ . '/../src/Controllers/AdminController.php';
 $adminController = new AdminController();
@@ -83,28 +74,7 @@ $router->add('POST', 'api/admin/cases', [$adminController, 'createCase']);
 $router->add('PATCH', 'api/admin/cases/{id}', [$adminController, 'updateCase']);
 $router->add('DELETE', 'api/admin/cases/{id}', [$adminController, 'deleteCase']);
 
-// Orders
-$router->add('GET', 'api/admin/orders', [$adminController, 'indexOrders']);
-$router->add('GET', 'api/admin/orders/{id}', [$adminController, 'showOrder']);
-$router->add('PATCH', 'api/admin/orders/{id}/status', [$adminController, 'updateOrderStatus']);
 
-// Invoices
-$router->add('GET', 'api/admin/invoices', [$adminController, 'indexInvoices']);
-$router->add('POST', 'api/admin/invoices', [$adminController, 'createInvoice']);
-$router->add('GET', 'api/admin/invoices/{id}/pdf', [$adminController, 'downloadInvoicePdf']);
-
-// Reviews (Admin)
-$router->add('GET', 'api/admin/reviews', [$adminController, 'indexReviews']);
-$router->add('GET', 'api/admin/reviews/{id}', [$adminController, 'showReview']);
-$router->add('PATCH', 'api/admin/reviews/{id}/status', [$adminController, 'updateReviewStatus']);
-$router->add('DELETE', 'api/admin/reviews/{id}', [$adminController, 'deleteReview']);
-
-// --- Public Reviews Routes ---
-require_once __DIR__ . '/../src/Controllers/ReviewController.php';
-$reviewController = new ReviewController();
-
-$router->add('POST', 'api/reviews', [$reviewController, 'create']);
-$router->add('GET', 'api/reviews', [$reviewController, 'indexApproved']);
 
 $router->add('GET', 'api', function() {
     http_response_code(200);

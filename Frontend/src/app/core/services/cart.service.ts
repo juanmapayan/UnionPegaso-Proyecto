@@ -1,6 +1,5 @@
-import { Injectable, signal, computed, effect, inject } from '@angular/core';
+import { Injectable, signal, computed, effect } from '@angular/core';
 import { Service } from '../../features/services/models/service.model';
-import { AuthService } from '../../admin/services/auth.service';
 
 export interface CartItem extends Service {
     quantity: number;
@@ -10,7 +9,6 @@ export interface CartItem extends Service {
     providedIn: 'root'
 })
 export class CartService {
-    private authService = inject(AuthService);
     private readonly STORAGE_KEY = 'cart_items'; // Single key for all states
 
     cartItems = signal<CartItem[]>([]);

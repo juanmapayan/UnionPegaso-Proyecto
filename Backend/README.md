@@ -49,17 +49,10 @@ La API estará disponible en `http://localhost:8000`.
 - **POST** `/api/auth/login`
   - Body: `{ "email": "email@test.com", "password": "pass" }`
 - **POST** `/api/auth/logout`
-- **GET** `/api/auth/session`
+- **GET** `/api/auth/me`
 
 ### Servicios
 - **GET** `/api/services`
 - **GET** `/api/services/{id}`
 
-### Compras
-- **POST** `/api/purchases`
-  - Body: `{ "items": [ { "service_id": 1, "quantity": 1 } ] }`
-  - Headers: Cookie de sesión requerida.
 
-### Facturas
-- **GET** `/api/invoices`
-- **GET** `/api/invoices/{id}`
