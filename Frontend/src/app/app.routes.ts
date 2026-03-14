@@ -32,10 +32,6 @@ export const routes: Routes = [
         loadChildren: () => import('./features/contact/contact.routes').then(m => m.CONTACT_ROUTES)
       },
       {
-        path: 'resenas',
-        loadChildren: () => import('./features/reviews/reviews.routes').then(m => m.REVIEWS_ROUTES)
-      },
-      {
         path: '',
         loadChildren: () => import('./features/auth/auth.routes').then(m => m.AUTH_ROUTES)
       }

@@ -1,8 +1,8 @@
 import { Component, signal, HostListener, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
-import { CartService } from '../../services/cart.service';
-import { AuthService } from '../../services/auth.service';
+//import { CartService } from '../../services/cart.service';
+//import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-navbar',
@@ -16,8 +16,8 @@ import { AuthService } from '../../services/auth.service';
 })
 export class NavbarComponent {
   private router = inject(Router);
-  public cartService = inject(CartService);
-  public authService = inject(AuthService);
+  //public cartService = inject(CartService);
+  //public authService = inject(AuthService);
 
   isScrolled = signal(false);
   mobileMenuOpen = signal(false);
