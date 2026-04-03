@@ -46,8 +46,10 @@ class AdminController {
         $price = $data['price'] ?? null;
         $is_active = $data['is_active'] ?? 1;
         $display_order = $data['display_order'] ?? 0;
+        $icon_key = trim($data['icon_key'] ?? '') ?: null;
+        $featured = !empty($data['featured']) ? 1 : 0;
 
-        // Basic validation: title required and price required & non-negative numeric
+        // Validación básica: título requerido y precio requerido y numérico no negativo
         if ($title === '' || $title === null) {
             http_response_code(400);
             echo json_encode(['error' => 'El título es obligatorio']);
@@ -61,17 +63,34 @@ class AdminController {
         }
 
         try {
-            $stmt = $this->db->prepare("INSERT INTO services (title, description, price, is_active, display_order) VALUES (?, ?, ?, ?, ?)");
-            $stmt->execute([$title, $description, (float) $price, $is_active, $display_order]);
+            $slug = $this->slugify($title);
+        
+            $stmt = $this->db->prepare("
+                INSERT INTO services (title, slug, description, price, icon_key, is_active, featured, display_order)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ");
+            $stmt->execute([
+                $title,
+                $slug,
+                $description,
+                (float) $price,
+                $icon_key,
+                $is_active ? 1 : 0,
+                $featured,
+                (int) $display_order
+            ]);
             
             $id = (int) $this->db->lastInsertId();
-
+        
             http_response_code(201);
             echo json_encode([
                 'id' => $id,
                 'title' => $title,
+                'slug' => $slug,
                 'description' => $description,
                 'price' => (float) $price,
+                'icon_key' => $icon_key,
+                'featured' => (bool) $featured,
                 'is_active' => (bool) $is_active,
                 'display_order' => (int) $display_order,
             ]);
@@ -81,20 +100,64 @@ class AdminController {
         }
     }
 
-    public function updateService($id) {
+    public function updateService($params) {
         $this->requireAdmin();
-
+    
+        $id = isset($params['id']) ? (int) $params['id'] : 0;
+        if ($id <= 0) {
+            http_response_code(400);
+            echo json_encode(['error' => 'ID de servicio no válido']);
+            return;
+        }
+    
         $data = json_decode(file_get_contents('php://input'), true);
-        
-        // We will update only provided fields
+    
         $fields = [];
-        $params = [];
+        $values = [];
+    
+        if (isset($data['title'])) {
+            $title = trim($data['title']);
+            $fields[] = 'title = ?';
+            $values[] = $title;
+    
+            $fields[] = 'slug = ?';
+            $values[] = $this->slugify($title);
+        }
+    
+        if (isset($data['description'])) {
+            $fields[] = 'description = ?';
+            $values[] = trim($data['description'] ?? '');
+        }
+    
+        if (isset($data['price'])) {
+            if ($data['price'] === '' || !is_numeric($data['price']) || (float) $data['price'] < 0) {
+                http_response_code(400);
+                echo json_encode(['error' => 'El precio debe ser un número válido mayor o igual a 0']);
+                return;
+            }
+            $fields[] = 'price = ?';
+            $values[] = (float) $data['price'];
+        }
+    
+        if (isset($data['is_active'])) {
+            $fields[] = 'is_active = ?';
+            $values[] = $data['is_active'] ? 1 : 0;
+        }
+    
+        if (isset($data['display_order'])) {
+            $fields[] = 'display_order = ?';
+            $values[] = (int) $data['display_order'];
+        }
 
-        if (isset($data['title'])) { $fields[] = 'title = ?'; $params[] = $data['title']; }
-        if (isset($data['description'])) { $fields[] = 'description = ?'; $params[] = $data['description']; }
-        if (isset($data['price'])) { $fields[] = 'price = ?'; $params[] = (float) $data['price']; }
-        if (isset($data['is_active'])) { $fields[] = 'is_active = ?'; $params[] = $data['is_active'] ? 1 : 0; }
-        if (isset($data['display_order'])) { $fields[] = 'display_order = ?'; $params[] = (int) $data['display_order']; }
+        if (isset($data['icon_key'])) {
+            $fields[] = 'icon_key = ?';
+            $values[] = trim($data['icon_key'] ?? '') ?: null;
+        }
+
+        if (isset($data['featured'])) {
+            $fields[] = 'featured = ?';
+            $values[] = $data['featured'] ? 1 : 0;
+        }
 
         if (empty($fields)) {
             http_response_code(400);
@@ -104,34 +167,36 @@ class AdminController {
 
         try {
             $sql = "UPDATE services SET " . implode(', ', $fields) . " WHERE id = ?";
-            $params[] = $id;
-            
+            $values[] = $id;
+    
             $stmt = $this->db->prepare($sql);
-            $stmt->execute($params);
-
-            // Return updated service in canonical structure
+            $stmt->execute($values);
+    
             $fetchStmt = $this->db->prepare("SELECT * FROM services WHERE id = ?");
             $fetchStmt->execute([$id]);
             $service = $fetchStmt->fetch(PDO::FETCH_ASSOC);
-
-            if ($service) {
-                echo json_encode($service);
-            } else {
-                echo json_encode(['message' => 'Servicio actualizado']);
-            }
+    
+            echo json_encode($service ?: ['message' => 'Servicio actualizado']);
         } catch (Exception $e) {
             http_response_code(500);
             echo json_encode(['error' => 'Error al actualizar servicio: ' . $e->getMessage()]);
         }
     }
 
-    public function deleteService($id) {
+    public function deleteService($params) {
         $this->requireAdmin();
-
+    
+        $id = isset($params['id']) ? (int) $params['id'] : 0;
+        if ($id <= 0) {
+            http_response_code(400);
+            echo json_encode(['error' => 'ID de servicio no válido']);
+            return;
+        }
+    
         try {
             $stmt = $this->db->prepare("DELETE FROM services WHERE id = ?");
             $stmt->execute([$id]);
-            
+    
             echo json_encode(['message' => 'Servicio eliminado']);
         } catch (Exception $e) {
             http_response_code(500);
@@ -160,6 +225,12 @@ class AdminController {
         $client = $data['client'] ?? '';
         $image_url = $data['image_url'] ?? '';
         $visible = $data['visible'] ?? 1;
+        $category = trim($data['category'] ?? '') ?: null;
+        $excerpt = trim($data['excerpt'] ?? '') ?: null;
+        $metric_value = trim($data['metric_value'] ?? '') ?: null;
+        $metric_label = trim($data['metric_label'] ?? '') ?: null;
+        $featured_case = !empty($data['featured']) ? 1 : 0;
+        $display_order_case = (int) ($data['display_order'] ?? 0);
 
         if (empty($title)) {
             http_response_code(400);
@@ -168,30 +239,125 @@ class AdminController {
         }
 
         try {
-            $stmt = $this->db->prepare("INSERT INTO success_cases (title, description, client, image_url, visible) VALUES (?, ?, ?, ?, ?)");
-            $stmt->execute([$title, $description, $client, $image_url, $visible]);
-            
+            $slug = $this->slugify($title);
+        
+            $stmt = $this->db->prepare("
+                INSERT INTO success_cases (title, slug, description, client, image_url, visible, category, excerpt, metric_value, metric_label, featured, display_order)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ");
+
+            $stmt->execute([
+                $title,
+                $slug,
+                $description,
+                $client ?: null,
+                $image_url ?: null,
+                $visible ? 1 : 0,
+                $category,
+                $excerpt,
+                $metric_value,
+                $metric_label,
+                $featured_case,
+                $display_order_case
+            ]);
+        
+            $id = (int) $this->db->lastInsertId();
+        
             http_response_code(201);
-            echo json_encode(['message' => 'Caso de éxito creado', 'id' => $this->db->lastInsertId()]);
+            echo json_encode([
+                'id' => $id,
+                'title' => $title,
+                'slug' => $slug,
+                'description' => $description,
+                'client' => $client ?: null,
+                'image_url' => $image_url ?: null,
+                'visible' => (bool) $visible,
+                'category' => $category,
+                'excerpt' => $excerpt,
+                'metric_value' => $metric_value,
+                'metric_label' => $metric_label,
+                'featured' => (bool) $featured_case,
+                'display_order' => $display_order_case,
+            ]);
         } catch (Exception $e) {
             http_response_code(500);
-            echo json_encode(['error' => 'Error al crear caso: ' . $e->getMessage()]);
+            echo json_encode(['error' => 'No se pudo crear el caso']);
         }
     }
 
-    public function updateCase($id) {
+    public function updateCase($params) {
         $this->requireAdmin();
-
+    
+        $id = isset($params['id']) ? (int) $params['id'] : 0;
+        if ($id <= 0) {
+            http_response_code(400);
+            echo json_encode(['error' => 'ID de caso no válido']);
+            return;
+        }
+    
         $data = json_decode(file_get_contents('php://input'), true);
-
+    
         $fields = [];
-        $params = [];
+        $values = [];
+    
+        if (isset($data['title'])) {
+            $title = trim($data['title']);
+            $fields[] = 'title = ?';
+            $values[] = $title;
+    
+            $fields[] = 'slug = ?';
+            $values[] = $this->slugify($title);
+        }
+    
+        if (isset($data['description'])) {
+            $fields[] = 'description = ?';
+            $values[] = trim($data['description'] ?? '');
+        }
+    
+        if (isset($data['client'])) {
+            $fields[] = 'client = ?';
+            $values[] = trim($data['client'] ?? '');
+        }
+    
+        if (isset($data['image_url'])) {
+            $fields[] = 'image_url = ?';
+            $values[] = trim($data['image_url'] ?? '');
+        }
+    
+        if (isset($data['visible'])) {
+            $fields[] = 'visible = ?';
+            $values[] = $data['visible'] ? 1 : 0;
+        }
 
-        if (isset($data['title'])) { $fields[] = 'title = ?'; $params[] = $data['title']; }
-        if (isset($data['description'])) { $fields[] = 'description = ?'; $params[] = $data['description']; }
-        if (isset($data['client'])) { $fields[] = 'client = ?'; $params[] = $data['client']; }
-        if (isset($data['image_url'])) { $fields[] = 'image_url = ?'; $params[] = $data['image_url']; }
-        if (isset($data['visible'])) { $fields[] = 'visible = ?'; $params[] = $data['visible']; }
+        if (isset($data['category'])) {
+            $fields[] = 'category = ?';
+            $values[] = trim($data['category'] ?? '') ?: null;
+        }
+
+        if (isset($data['excerpt'])) {
+            $fields[] = 'excerpt = ?';
+            $values[] = trim($data['excerpt'] ?? '') ?: null;
+        }
+
+        if (isset($data['metric_value'])) {
+            $fields[] = 'metric_value = ?';
+            $values[] = trim($data['metric_value'] ?? '') ?: null;
+        }
+
+        if (isset($data['metric_label'])) {
+            $fields[] = 'metric_label = ?';
+            $values[] = trim($data['metric_label'] ?? '') ?: null;
+        }
+
+        if (isset($data['featured'])) {
+            $fields[] = 'featured = ?';
+            $values[] = $data['featured'] ? 1 : 0;
+        }
+
+        if (isset($data['display_order'])) {
+            $fields[] = 'display_order = ?';
+            $values[] = (int) $data['display_order'];
+        }
 
         if (empty($fields)) {
             http_response_code(400);
@@ -201,25 +367,36 @@ class AdminController {
 
         try {
             $sql = "UPDATE success_cases SET " . implode(', ', $fields) . " WHERE id = ?";
-            $params[] = $id;
-            
+            $values[] = $id;
+    
             $stmt = $this->db->prepare($sql);
-            $stmt->execute($params);
-
-            echo json_encode(['message' => 'Caso actualizado']);
+            $stmt->execute($values);
+    
+            $fetchStmt = $this->db->prepare("SELECT * FROM success_cases WHERE id = ?");
+            $fetchStmt->execute([$id]);
+            $case = $fetchStmt->fetch(PDO::FETCH_ASSOC);
+    
+            echo json_encode($case ?: ['message' => 'Caso actualizado']);
         } catch (Exception $e) {
             http_response_code(500);
             echo json_encode(['error' => 'Error al actualizar caso: ' . $e->getMessage()]);
         }
     }
 
-    public function deleteCase($id) {
+    public function deleteCase($params) {
         $this->requireAdmin();
-
+    
+        $id = isset($params['id']) ? (int) $params['id'] : 0;
+        if ($id <= 0) {
+            http_response_code(400);
+            echo json_encode(['error' => 'ID de caso no válido']);
+            return;
+        }
+    
         try {
             $stmt = $this->db->prepare("DELETE FROM success_cases WHERE id = ?");
             $stmt->execute([$id]);
-            
+    
             echo json_encode(['message' => 'Caso eliminado']);
         } catch (Exception $e) {
             http_response_code(500);
@@ -295,7 +472,7 @@ class AdminController {
             $stmtItems->execute([$id]);
             $order['items'] = $stmtItems->fetchAll(PDO::FETCH_ASSOC);
             
-            // Check if invoice exists
+            // Verificar si la factura existe
             $stmtInvoice = $this->db->prepare("SELECT * FROM invoices WHERE order_id = ?");
             $stmtInvoice->execute([$id]);
             $order['invoice'] = $stmtInvoice->fetch(PDO::FETCH_ASSOC);
@@ -360,7 +537,7 @@ class AdminController {
         }
 
         try {
-            // Check if exists
+            // Verificar si existe
             $stmt = $this->db->prepare("SELECT id FROM invoices WHERE order_id = ?");
             $stmt->execute([$orderId]);
             if ($stmt->fetch()) {
@@ -369,7 +546,7 @@ class AdminController {
                 return;
             }
 
-            // Generate Invoice Number (YYYY-XXXX)
+            // Generar número de factura (YYYY-XXXX)
             $year = date('Y');
             $stmt = $this->db->prepare("SELECT invoice_number FROM invoices WHERE invoice_number LIKE ? ORDER BY id DESC LIMIT 1");
             $stmt->execute(["$year-%"]);
@@ -383,7 +560,7 @@ class AdminController {
             }
             $invoiceNumber = $year . '-' . str_pad($sequence, 4, '0', STR_PAD_LEFT);
 
-            // Create Invoice
+            // Crear factura
             $stmt = $this->db->prepare("INSERT INTO invoices (order_id, invoice_number) VALUES (?, ?)");
             $stmt->execute([$orderId, $invoiceNumber]);
             $invoiceId = $this->db->lastInsertId();
@@ -420,7 +597,7 @@ class AdminController {
             $pdf = new FPDF();
             $pdf->AddPage();
             
-            // Header
+            // Encabezado
             $pdf->SetFont('Arial', 'B', 16);
             $pdf->Cell(0, 10, utf8_decode('Unión Pegaso - Factura'), 0, 1, 'C');
             
@@ -430,7 +607,7 @@ class AdminController {
             
             $pdf->Ln(10);
             
-            // Client Info
+            // Información del cliente
             $pdf->SetFont('Arial', 'B', 12);
             $pdf->Cell(0, 10, 'Cliente:', 0, 1);
             $pdf->SetFont('Arial', '', 12);
@@ -439,7 +616,7 @@ class AdminController {
             
             $pdf->Ln(10);
             
-            // Items Table
+            // Tabla de artículos
             $pdf->SetFont('Arial', 'B', 12);
             $pdf->Cell(100, 10, utf8_decode('Descripción'), 1);
             $pdf->Cell(30, 10, 'Cant.', 1);
@@ -565,5 +742,329 @@ class AdminController {
             http_response_code(500);
             echo json_encode(['error' => 'Error al eliminar reseña: ' . $e->getMessage()]);
         }
+    }
+    // --- Leads Management ---
+
+    public function indexLeads() {
+        $this->requireAdmin();
+
+        try {
+            $stmt = $this->db->query("
+                SELECT cl.*, s.title as service_name
+                FROM contact_leads cl
+                LEFT JOIN services s ON cl.service_id = s.id
+                ORDER BY cl.created_at DESC
+            ");
+            $leads = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            echo json_encode($leads);
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode(['error' => 'Error al listar leads: ' . $e->getMessage()]);
+        }
+    }
+
+    public function updateLeadStatus($params) {
+        $this->requireAdmin();
+
+        $id = isset($params['id']) ? (int) $params['id'] : 0;
+        if ($id <= 0) {
+            http_response_code(400);
+            echo json_encode(['error' => 'ID de lead no válido']);
+            return;
+        }
+
+        $data = json_decode(file_get_contents('php://input'), true);
+        $status = $data['status'] ?? '';
+
+        $allowed = ['new', 'read', 'contacted', 'archived'];
+        if (!in_array($status, $allowed)) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Estado no válido']);
+            return;
+        }
+
+        try {
+            $stmt = $this->db->prepare("UPDATE contact_leads SET status = ?, updated_at = NOW() WHERE id = ?");
+            $stmt->execute([$status, $id]);
+
+            if ($stmt->rowCount() === 0) {
+                http_response_code(404);
+                echo json_encode(['error' => 'Lead no encontrado']);
+                return;
+            }
+
+            echo json_encode(['success' => true, 'message' => 'Estado actualizado']);
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode(['error' => 'Error al actualizar lead: ' . $e->getMessage()]);
+        }
+    }
+
+    // --- Dashboard ---
+
+    public function indexDashboard() {
+        $this->requireAdmin();
+
+        try {
+            $services  = (int) $this->db->query("SELECT COUNT(*) FROM services WHERE is_active = 1")->fetchColumn();
+            $cases     = (int) $this->db->query("SELECT COUNT(*) FROM success_cases WHERE visible = 1")->fetchColumn();
+            $portfolio = (int) $this->db->query("SELECT COUNT(*) FROM portfolio_items WHERE visible = 1")->fetchColumn();
+            $leads     = (int) $this->db->query("SELECT COUNT(*) FROM contact_leads")->fetchColumn();
+
+            $recentLeads = $this->db->query("
+                SELECT id, lead_type, nombre, email, status, created_at
+                FROM contact_leads
+                ORDER BY created_at DESC
+                LIMIT 5
+            ")->fetchAll(PDO::FETCH_ASSOC);
+
+            echo json_encode([
+                'services'     => $services,
+                'cases'        => $cases,
+                'portfolio'    => $portfolio,
+                'leads'        => $leads,
+                'recent_leads' => $recentLeads,
+            ]);
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode(['error' => 'Error al cargar dashboard: ' . $e->getMessage()]);
+        }
+    }
+
+    // --- Portfolio CRUD ---
+
+    public function indexPortfolio() {
+        $this->requireAdmin();
+
+        try {
+            $stmt = $this->db->query("SELECT * FROM portfolio_items ORDER BY display_order ASC, created_at DESC");
+            $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            echo json_encode($items);
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode(['error' => 'Error al listar portfolio: ' . $e->getMessage()]);
+        }
+    }
+
+    public function createPortfolio() {
+        $this->requireAdmin();
+
+        $data = json_decode(file_get_contents('php://input'), true);
+
+        $title     = trim($data['title'] ?? '');
+        $type      = $data['type'] ?? 'image';
+        $media_url = trim($data['media_url'] ?? '');
+
+        if ($title === '') {
+            http_response_code(400);
+            echo json_encode(['error' => 'El título es obligatorio']);
+            return;
+        }
+
+        if (!in_array($type, ['image', 'video'])) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Tipo no válido (image o video)']);
+            return;
+        }
+
+        if ($media_url === '') {
+            http_response_code(400);
+            echo json_encode(['error' => 'La URL del medio es obligatoria']);
+            return;
+        }
+
+        try {
+            $slug        = $this->slugify($title);
+            $poster_url  = trim($data['poster_url'] ?? '') ?: null;
+            $orientation = in_array($data['orientation'] ?? '', ['horizontal','vertical','square']) ? $data['orientation'] : 'horizontal';
+            $category    = trim($data['category'] ?? '') ?: null;
+            $description = trim($data['description'] ?? '') ?: null;
+            $year        = !empty($data['year']) ? (int) $data['year'] : null;
+            $featured    = !empty($data['featured']) ? 1 : 0;
+            $visible     = isset($data['visible']) ? ($data['visible'] ? 1 : 0) : 1;
+            $display_order = (int) ($data['display_order'] ?? 0);
+
+            $stmt = $this->db->prepare("
+                INSERT INTO portfolio_items
+                (title, slug, type, media_url, poster_url, orientation, category, description, year, featured, visible, display_order)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ");
+            $stmt->execute([
+                $title, $slug, $type, $media_url, $poster_url, $orientation,
+                $category, $description, $year, $featured, $visible, $display_order
+            ]);
+
+            $id = (int) $this->db->lastInsertId();
+
+            http_response_code(201);
+            echo json_encode(['id' => $id, 'title' => $title, 'slug' => $slug, 'type' => $type, 'media_url' => $media_url, 'visible' => (bool) $visible]);
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode(['error' => 'Error al crear item de portfolio: ' . $e->getMessage()]);
+        }
+    }
+
+    public function updatePortfolio($params) {
+        $this->requireAdmin();
+
+        $id = isset($params['id']) ? (int) $params['id'] : 0;
+        if ($id <= 0) {
+            http_response_code(400);
+            echo json_encode(['error' => 'ID no válido']);
+            return;
+        }
+
+        $data   = json_decode(file_get_contents('php://input'), true);
+        $fields = [];
+        $values = [];
+
+        if (isset($data['title'])) {
+            $title    = trim($data['title']);
+            $fields[] = 'title = ?';
+            $values[] = $title;
+            $fields[] = 'slug = ?';
+            $values[] = $this->slugify($title);
+        }
+        if (isset($data['type']) && in_array($data['type'], ['image', 'video'])) {
+            $fields[] = 'type = ?';
+            $values[] = $data['type'];
+        }
+        if (isset($data['media_url'])) {
+            $fields[] = 'media_url = ?';
+            $values[] = trim($data['media_url']);
+        }
+        if (isset($data['poster_url'])) {
+            $fields[] = 'poster_url = ?';
+            $values[] = trim($data['poster_url']) ?: null;
+        }
+        if (isset($data['orientation']) && in_array($data['orientation'], ['horizontal','vertical','square'])) {
+            $fields[] = 'orientation = ?';
+            $values[] = $data['orientation'];
+        }
+        if (isset($data['category'])) {
+            $fields[] = 'category = ?';
+            $values[] = trim($data['category']) ?: null;
+        }
+        if (isset($data['description'])) {
+            $fields[] = 'description = ?';
+            $values[] = trim($data['description']) ?: null;
+        }
+        if (isset($data['year'])) {
+            $fields[] = 'year = ?';
+            $values[] = $data['year'] ? (int) $data['year'] : null;
+        }
+        if (isset($data['featured'])) {
+            $fields[] = 'featured = ?';
+            $values[] = $data['featured'] ? 1 : 0;
+        }
+        if (isset($data['visible'])) {
+            $fields[] = 'visible = ?';
+            $values[] = $data['visible'] ? 1 : 0;
+        }
+        if (isset($data['display_order'])) {
+            $fields[] = 'display_order = ?';
+            $values[] = (int) $data['display_order'];
+        }
+
+        if (empty($fields)) {
+            http_response_code(400);
+            echo json_encode(['error' => 'No hay datos para actualizar']);
+            return;
+        }
+
+        try {
+            $sql      = "UPDATE portfolio_items SET " . implode(', ', $fields) . " WHERE id = ?";
+            $values[] = $id;
+            $stmt     = $this->db->prepare($sql);
+            $stmt->execute($values);
+
+            $fetchStmt = $this->db->prepare("SELECT * FROM portfolio_items WHERE id = ?");
+            $fetchStmt->execute([$id]);
+            $item = $fetchStmt->fetch(PDO::FETCH_ASSOC);
+
+            echo json_encode($item ?: ['message' => 'Item actualizado']);
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode(['error' => 'Error al actualizar portfolio: ' . $e->getMessage()]);
+        }
+    }
+
+    public function deletePortfolio($params) {
+        $this->requireAdmin();
+
+        $id = isset($params['id']) ? (int) $params['id'] : 0;
+        if ($id <= 0) {
+            http_response_code(400);
+            echo json_encode(['error' => 'ID no válido']);
+            return;
+        }
+
+        try {
+            $stmt = $this->db->prepare("DELETE FROM portfolio_items WHERE id = ?");
+            $stmt->execute([$id]);
+            echo json_encode(['message' => 'Item eliminado']);
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode(['error' => 'Error al eliminar item de portfolio: ' . $e->getMessage()]);
+        }
+    }
+
+    // --- Media Upload ---
+
+    public function uploadMedia() {
+        $this->requireAdmin();
+
+        if (!isset($_FILES['file']) || $_FILES['file']['error'] !== UPLOAD_ERR_OK) {
+            http_response_code(400);
+            echo json_encode(['error' => 'No se recibió ningún archivo o hubo un error en la subida']);
+            return;
+        }
+
+        $file = $_FILES['file'];
+
+        $allowedMimes = ['image/jpeg', 'image/png', 'image/webp', 'video/mp4'];
+        $finfo = new finfo(FILEINFO_MIME_TYPE);
+        $mime  = $finfo->file($file['tmp_name']);
+
+        if (!in_array($mime, $allowedMimes)) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Tipo de archivo no permitido. Usa JPG, PNG, WebP o MP4.']);
+            return;
+        }
+
+        if ($file['size'] > 20 * 1024 * 1024) {
+            http_response_code(400);
+            echo json_encode(['error' => 'El archivo supera el límite de 20MB']);
+            return;
+        }
+
+        $extensions = [
+            'image/jpeg' => 'jpg',
+            'image/png'  => 'png',
+            'image/webp' => 'webp',
+            'video/mp4'  => 'mp4',
+        ];
+
+        $ext       = $extensions[$mime];
+        $filename  = uniqid('media_', true) . '.' . $ext;
+        $uploadDir = __DIR__ . '/../../public/uploads/';
+
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+        }
+
+        if (!move_uploaded_file($file['tmp_name'], $uploadDir . $filename)) {
+            http_response_code(500);
+            echo json_encode(['error' => 'No se pudo guardar el archivo en el servidor']);
+            return;
+        }
+
+        echo json_encode(['url' => '/uploads/' . $filename]);
+    }
+
+    private function slugify($text) {
+        $text = strtolower(trim($text));
+        $text = preg_replace('/[^a-z0-9]+/i', '-', $text);
+        return trim($text, '-');
     }
 }

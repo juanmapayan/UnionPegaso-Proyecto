@@ -14,7 +14,7 @@ interface Order {
     currency: string;
     status: string;
     created_at: string;
-    items_count?: number; // Optional, maybe we calculate it or get it from backend if needed, but for list maybe not strictly necessary unless we join
+    items_count?: number; // Opcional, quizás lo calculemos u obtengamos del backend si es necesario, pero para el listado puede no ser estrictamente necesario a menos que hagamos un join
 }
 
 @Component({

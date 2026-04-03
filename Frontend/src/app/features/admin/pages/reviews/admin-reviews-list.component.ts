@@ -151,7 +151,7 @@ export class AdminReviewsListComponent implements OnInit {
 
         this.http.patch(`${this.apiUrl}/${review.id}/status`, { status }, { withCredentials: true }).subscribe({
             next: () => {
-                this.loadReviews(); // Reload to refresh list
+                this.loadReviews(); // Recargar para actualizar la lista
             },
             error: (err) => {
                 console.error('Error updating status', err);

@@ -3,7 +3,7 @@
     <div class="max-w-4xl mx-auto">
       <div class="flex flex-col md:flex-row bg-[#0F0F0F] border border-white/10 rounded-2xl overflow-hidden">
         
-        <!-- Sidebar Info -->
+        <!-- Información lateral -->
         <div class="md:w-1/3 bg-[#151515] p-8 flex flex-col justify-between border-r border-white/10">
           <div>
             <h2 class="text-2xl font-bold text-white mb-2">Solicita tu presupuesto</h2>
@@ -39,11 +39,11 @@
           </div>
         </div>
 
-        <!-- Form Area -->
+        <!-- Área del formulario -->
         <div class="flex-1 p-6 md:p-10">
           <form [formGroup]="quoteForm" (ngSubmit)="onSubmit()" class="space-y-8">
             
-            <!-- Services -->
+            <!-- Servicios -->
             <div>
               <label class="block text-sm font-medium text-gray-300 mb-3">¿Qué servicios necesitas?</label>
               <div class="grid grid-cols-2 gap-3">
@@ -65,7 +65,7 @@
               }
             </div>
 
-            <!-- Project Details -->
+            <!-- Detalles del proyecto -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label class="block text-sm font-medium text-gray-400 mb-1">Nombre Completo</label>
@@ -95,20 +95,20 @@
                </div>
             </div>
 
-            <!-- Description -->
+            <!-- Descripción -->
             <div>
               <label class="block text-sm font-medium text-gray-400 mb-1">Detalles del proyecto</label>
               <textarea formControlName="details" rows="3" class="w-full bg-[#1a1a1a] border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-purple-500 transition-colors" placeholder="Cuéntanos tus objetivos principales..."></textarea>
             </div>
 
-            <!-- Privacy -->
+            <!-- Privacidad -->
             <div class="flex items-start gap-2">
               <input formControlName="privacy" type="checkbox" id="privacy" class="mt-1">
               <label for="privacy" class="text-xs text-gray-500">Acepto la política de privacidad y el tratamiento de mis datos para la elaboración del presupuesto.</label>
             </div>
              @if (submitted && quoteForm.get('privacy')?.invalid) { <p class="text-red-500 text-xs">Debes aceptar la política de privacidad.</p> }
 
-            <!-- Submit -->
+            <!-- Enviar -->
             <button 
               type="submit" 
               [class]="'btn btn-primary btn-lg w-full btn-arrow' + (isSending() ? ' btn-loading' : '')"

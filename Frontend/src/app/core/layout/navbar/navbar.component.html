@@ -5,32 +5,42 @@
     <!-- Logo -->
     <a (click)="scrollToTop()" class="flex items-center gap-3 cursor-pointer">
       <img src="assets/brand/logo.png" alt="Unión Pegaso" class="h-12">
-      <span class="font-bold text-xl tracking-tight text-white">Unión Pegaso</span>
+      <span class="font-display font-bold text-xl tracking-tight text-white">Unión Pegaso</span>
     </a>
 
-    <!-- Desktop Menu -->
-    <nav class="hidden md:flex items-center gap-8">
+    <!-- Menú escritorio -->
+    <nav class="hidden md:flex items-center gap-10">
       <a routerLink="/" routerLinkActive="text-purple-400 font-semibold" [routerLinkActiveOptions]="{exact: true}"
-        class="text-sm font-medium text-gray-300 hover:text-white transition-colors">Inicio</a>
+        class="text-[13px] font-medium text-zinc-400 hover:text-white transition-colors">Inicio</a>
       <a routerLink="/servicios" routerLinkActive="text-purple-400 font-semibold"
-        class="text-sm font-medium text-gray-300 hover:text-white transition-colors">Servicios</a>
+        class="text-[13px] font-medium text-zinc-400 hover:text-white transition-colors">Servicios</a>
       <a routerLink="/casos-exito" routerLinkActive="text-purple-400 font-semibold"
-        class="text-sm font-medium text-gray-300 hover:text-white transition-colors">Casos de Éxito</a>
+        class="text-[13px] font-medium text-zinc-400 hover:text-white transition-colors">Casos de Éxito</a>
       <a routerLink="/contacto" routerLinkActive="text-purple-400 font-semibold"
-        class="text-sm font-medium text-gray-300 hover:text-white transition-colors">Contacto</a>
+        class="text-[13px] font-medium text-zinc-400 hover:text-white transition-colors">Contacto</a>
     </nav>
 
-    <!-- CTA & Cart & Mobile Toggle -->
+    <!-- CTA, Auth y botón móvil -->
     <div class="flex items-center gap-4">
+      <!-- Acciones de autenticación (escritorio) -->
+      @if (!authService.isAuthenticated()) {
+        <a routerLink="/login" class="hidden md:inline-flex text-sm font-medium text-gray-300 hover:text-white transition-colors">Iniciar Sesión</a>
+        <a routerLink="/register" class="hidden md:inline-flex px-4 py-2 border border-purple-500/60 text-purple-400 hover:bg-purple-500/10 text-sm font-medium rounded-full transition-all">Registro</a>
+      } @else {
+        @if (authService.currentUser()?.rol === 'admin') {
+          <a routerLink="/admin" class="hidden md:inline-flex px-4 py-2 border border-white/30 text-gray-300 hover:border-white/60 hover:text-white text-sm font-medium rounded-full transition-all">Panel Admin</a>
+        } @else {
+          <a routerLink="/perfil" class="hidden md:inline-flex text-sm font-medium text-gray-300 hover:text-white transition-colors">Perfil</a>
+        }
+        <button (click)="logout()" class="hidden md:inline-flex text-sm font-medium text-gray-400 hover:text-white transition-colors">Salir</button>
+      }
+
       <a routerLink="/presupuesto"
-      class="hidden md:inline-flex px-5 py-2.5 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-full transition-all shadow-[0_0_15px_rgba(147,51,234,0.3)] hover:shadow-[0_0_25px_rgba(147,51,234,0.5)]">
+      class="hidden md:inline-flex px-5 py-2.5 bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-500 hover:to-purple-400 text-white text-sm font-medium rounded-full transition-all shadow-[0_0_15px_rgba(147,51,234,0.3)] hover:shadow-[0_0_25px_rgba(147,51,234,0.5)]">
       Solicitar Presupuesto
       </a>
 
-      <!-- CTA (Solicitar Presupuesto) - Still kept but maybe secondary if auth buttons take space? User asked to recover auth buttons. -->
-      <!-- Let's keep it but ensure it fits. -->
-
-      <!-- Mobile Menu Button -->
+      <!-- Botón menú móvil -->
       <button class="md:hidden text-white" (click)="toggleMobileMenu()">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
           class="w-7 h-7">
@@ -40,7 +50,7 @@
     </div>
   </div>
 
-  <!-- Mobile Menu Dropdown -->
+  <!-- Menú desplegable móvil -->
   @if (mobileMenuOpen()) {
   <div
     class="md:hidden absolute top-full left-0 w-full bg-[#0a0a0a] border-b border-white/10 p-6 flex flex-col gap-4 shadow-2xl animate-in slide-in-from-top-5">
@@ -56,7 +66,23 @@
 
     <hr class="border-white/10 my-2">
 
-    
+    <!-- Acciones de autenticación (móvil) -->
+    @if (!authService.isAuthenticated()) {
+      <a (click)="closeMobileMenu()" routerLink="/login"
+        class="text-left text-base font-medium text-gray-300 hover:text-white">Iniciar Sesión</a>
+      <a (click)="closeMobileMenu()" routerLink="/register"
+        class="text-left text-base font-medium text-purple-400 hover:text-purple-300">Registro</a>
+    } @else {
+      @if (authService.currentUser()?.rol === 'admin') {
+        <a (click)="closeMobileMenu()" routerLink="/admin"
+          class="text-left text-base font-medium text-gray-300 hover:text-white">Panel Admin</a>
+      } @else {
+        <a (click)="closeMobileMenu()" routerLink="/perfil"
+          class="text-left text-base font-medium text-gray-300 hover:text-white">Perfil</a>
+      }
+      <button (click)="logout(); closeMobileMenu()"
+        class="text-left text-base font-medium text-gray-400 hover:text-white">Salir</button>
+    }
 
     <hr class="border-white/10 my-2">
     <a (click)="closeMobileMenu()" routerLink="/presupuesto"

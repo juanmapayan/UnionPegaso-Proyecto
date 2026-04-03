@@ -28,7 +28,7 @@ export class ModalService {
 
   closeServiceModal() {
     this.isServiceModalOpen.set(false);
-    // Clear service after animation completes
+    // Limpiar el servicio tras completar la animación
     setTimeout(() => {
       this.selectedService.set(null);
     }, 300);

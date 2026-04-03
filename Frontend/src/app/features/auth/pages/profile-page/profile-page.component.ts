@@ -238,7 +238,7 @@ export class ProfilePageComponent {
     return name ? name.charAt(0).toUpperCase() : '?';
   });
 
-  // Profile Form
+  // Formulario de perfil
   profileForm = this.fb.group({
     nombre: ['', Validators.required],
     email: ['', [Validators.required, Validators.email]]
@@ -248,7 +248,7 @@ export class ProfilePageComponent {
   profileMessage = signal<string | null>(null);
   profileError = signal(false);
 
-  // Password Form
+  // Formulario de contraseña
   passwordForm = this.fb.group({
     currentPassword: ['', Validators.required],
     newPassword: ['', [
@@ -268,7 +268,7 @@ export class ProfilePageComponent {
   showConfirmNewPassword = signal(false);
 
   constructor() {
-    // Fill profile form when user data is available
+    // Rellenar formulario de perfil cuando los datos del usuario estén disponibles
     effect(() => {
       const user = this.currentUser();
       if (user) {

@@ -13,7 +13,7 @@ import { QuoteFormComponent } from '@shared';
 })
 export class BudgetPageComponent {
   onFormSubmitted() {
-    // Handle form submission, e.g., navigate or show success
+    // Manejar envío del formulario, ej. navegar o mostrar éxito
     console.log('Form submitted');
   }
 }

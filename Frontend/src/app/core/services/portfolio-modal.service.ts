@@ -1,5 +1,5 @@
 import { Injectable, signal } from '@angular/core';
-import { PortfolioItem } from '../../features/home/data/portfolio.data';
+import { PortfolioItem } from '../../features/portfolio/models/portfolio-item.model';
 
 @Injectable({
     providedIn: 'root'
@@ -17,7 +17,7 @@ export class PortfolioModalService {
     close() {
         this.isOpen.set(false);
         document.body.classList.remove('modal-open');
-        // Clear item after animation
+        // Limpiar el item tras la animación
         setTimeout(() => {
             this.selectedItem.set(null);
         }, 300);

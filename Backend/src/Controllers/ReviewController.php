@@ -25,10 +25,10 @@ class ReviewController {
         $authorName = $data['author_name'] ?? '';
         $rating = $data['rating'] ?? 0;
         $comment = $data['comment'] ?? '';
-        $authorEmail = $data['author_email'] ?? ''; // Optional
+        $authorEmail = $data['author_email'] ?? ''; // Opcional
         $relatedType = $data['related_type'] ?? 'general';
         $relatedId = $data['related_id'] ?? null;
-        $userId = $_SESSION['user_id'] ?? null; // If logged in
+        $userId = $_SESSION['user_id'] ?? null; // Si está autenticado
 
         if (empty($authorName) || empty($comment) || $rating < 1 || $rating > 5) {
             http_response_code(400);

@@ -1,9 +1,15 @@
 <?php
 
-// Error reporting for development
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+// Reporte de errores — solo activo en desarrollo
+if (getenv('APP_ENV') === 'development') {
+    ini_set('display_errors', 1);
+    ini_set('display_startup_errors', 1);
+    error_reporting(E_ALL);
+} else {
+    ini_set('display_errors', 0);
+    ini_set('display_startup_errors', 0);
+    error_reporting(0);
+}
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -11,9 +17,9 @@ require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../src/Database.php';
 require_once __DIR__ . '/../src/Router.php';
 
-// CORS Handling
+// Manejo de CORS
 $config = require __DIR__ . '/../config/config.php';
-$allowedOrigins = ['http://localhost:4200', 'http://127.0.0.1:4200']; // Explicitly add Angular dev server
+$allowedOrigins = $config['cors']['allowed_origins'] ?? [];
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 
 if (in_array($origin, $allowedOrigins)) {
@@ -28,17 +34,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
-// Session Start
+// Inicio de sesión
+ini_set('session.cookie_httponly', 1);
+ini_set('session.cookie_samesite', 'Lax');
+if (getenv('APP_ENV') !== 'development') {
+    ini_set('session.cookie_secure', 1);
+}
 session_start();
 
-// Initialize Router
+// Inicializar Router
 $router = new Router();
 
-// Define Controllers (Autoloading would be better, but we keep it simple)
-// We will require controllers here as we implement them
+// Definir Controladores (Autoloading sería mejor, pero lo mantenemos simple)
+// Requeriremos los controladores aquí conforme los implementemos
 
-// Dispatch
-$router = new Router();
 
 require_once __DIR__ . '/../src/Controllers/AuthController.php';
 $authController = new AuthController();
@@ -60,21 +69,33 @@ $router->add('GET', 'api/services/{id}', [$serviceController, 'show']);
 require_once __DIR__ . '/../src/Controllers/AdminController.php';
 $adminController = new AdminController();
 
-// Services
+// Servicios
 $router->add('GET', 'api/admin/services', [$adminController, 'indexServices']);
 $router->add('POST', 'api/admin/services', [$adminController, 'createService']);
 $router->add('PATCH', 'api/admin/services/{id}', [$adminController, 'updateService']);
-// Support PUT in addition to PATCH for updates to align with REST conventions
 $router->add('PUT', 'api/admin/services/{id}', [$adminController, 'updateService']);
 $router->add('DELETE', 'api/admin/services/{id}', [$adminController, 'deleteService']);
 
-// Success Cases
 $router->add('GET', 'api/admin/cases', [$adminController, 'indexCases']);
 $router->add('POST', 'api/admin/cases', [$adminController, 'createCase']);
 $router->add('PATCH', 'api/admin/cases/{id}', [$adminController, 'updateCase']);
+$router->add('PUT', 'api/admin/cases/{id}', [$adminController, 'updateCase']);
 $router->add('DELETE', 'api/admin/cases/{id}', [$adminController, 'deleteCase']);
 
+// Casos de éxito
+require_once __DIR__ . '/../src/Controllers/SuccessCaseController.php';
+$successCaseController = new SuccessCaseController();
 
+
+
+$router->add('GET', 'api/cases', [$successCaseController, 'index']);
+$router->add('GET', 'api/cases/{slug}', [$successCaseController, 'show']);
+
+// Portafolio
+require_once __DIR__ . '/../src/Controllers/PortfolioController.php';
+$portfolioController = new PortfolioController();
+
+$router->add('GET', 'api/portfolio', [$portfolioController, 'index']);
 
 $router->add('GET', 'api', function() {
     http_response_code(200);
@@ -85,7 +106,21 @@ $router->add('GET', '/', function() {
     echo json_encode(['message' => 'Union Pegaso API']);
 });
 
-// Dispatch
-$method = $_SERVER['REQUEST_METHOD'];
-$uri = $_SERVER['REQUEST_URI'];
-$router->dispatch($method, $uri);
+require_once __DIR__ . '/../src/Controllers/LeadController.php';
+$leadController = new LeadController();
+$router->add('POST', 'api/leads', [$leadController, 'create']);
+
+$router->add('GET',    'api/admin/dashboard',        [$adminController, 'indexDashboard']);
+$router->add('GET',    'api/admin/leads',            [$adminController, 'indexLeads']);
+$router->add('PATCH',  'api/admin/leads/{id}',       [$adminController, 'updateLeadStatus']);
+
+// Portafolio
+$router->add('POST',   'api/admin/upload',             [$adminController, 'uploadMedia']);
+
+$router->add('GET',    'api/admin/portfolio',         [$adminController, 'indexPortfolio']);
+$router->add('POST',   'api/admin/portfolio',         [$adminController, 'createPortfolio']);
+$router->add('PATCH',  'api/admin/portfolio/{id}',    [$adminController, 'updatePortfolio']);
+$router->add('PUT',    'api/admin/portfolio/{id}',    [$adminController, 'updatePortfolio']);
+$router->add('DELETE', 'api/admin/portfolio/{id}',    [$adminController, 'deletePortfolio']);
+
+$router->dispatch($_SERVER['REQUEST_METHOD'], $_SERVER['REQUEST_URI']);

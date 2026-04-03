@@ -100,3 +100,11 @@ Thumbs.db
 
 # Evitar repositorios Git anidados accidentales
 **/.git
+
+# Herramientas de desarrollo local
+.claude/
+memory/
+
+# Media uploads (solo mantener estructura)
+Backend/public/uploads/*
+!Backend/public/uploads/.gitkeep
