@@ -18,7 +18,7 @@ class Database {
         try {
             $this->pdo = new PDO($dsn, $dbConfig['user'], $dbConfig['password'], $options);
         } catch (\PDOException $e) {
-            // In production, log the error and show a generic message
+            // En producción, registrar el error y mostrar un mensaje genérico
             throw new \PDOException($e->getMessage(), (int)$e->getCode());
         }
     }

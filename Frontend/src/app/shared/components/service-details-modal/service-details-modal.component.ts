@@ -246,13 +246,13 @@ export class ServiceDetailsModalComponent implements OnDestroy {
   }
   
   private onOpen() {
-    // Store currently focused element
+    // Guardar el elemento enfocado actualmente
     this.focusedElementBeforeOpen = document.activeElement as HTMLElement;
     
-    // Block body scroll using class (avoids layout shift)
+    // Bloquear el scroll del body usando clase (evita salto de layout)
     document.body.classList.add('modal-open');
     
-    // Focus close button after animation
+    // Enfocar el botón de cerrar tras la animación
     setTimeout(() => {
       const closeButton = document.querySelector('[aria-label="Cerrar modal"]') as HTMLElement;
       closeButton?.focus();
@@ -260,10 +260,10 @@ export class ServiceDetailsModalComponent implements OnDestroy {
   }
   
   private onClose() {
-    // Restore body scroll using class
+    // Restaurar el scroll del body usando clase
     document.body.classList.remove('modal-open');
     
-    // Restore focus to trigger element
+    // Restaurar el foco al elemento disparador
     if (this.focusedElementBeforeOpen) {
       setTimeout(() => {
         this.focusedElementBeforeOpen?.focus();
@@ -287,7 +287,7 @@ export class ServiceDetailsModalComponent implements OnDestroy {
   }
   
   ngOnDestroy() {
-    // Ensure body scroll is restored and modal-open class is removed
+    // Asegurar que el scroll del body se restaure y se elimine la clase modal-open
     document.body.classList.remove('modal-open');
   }
 }

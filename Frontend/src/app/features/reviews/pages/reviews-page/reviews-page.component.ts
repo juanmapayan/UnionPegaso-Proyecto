@@ -153,16 +153,16 @@ export class ReviewsPageComponent implements OnInit {
     ngOnInit() {
         this.loadReviews();
 
-        // Auto-fill name if logged in
+        // Autorellenar nombre si el usuario está autenticado
         if (this.authService.currentUser()) {
             this.reviewForm.patchValue({
                 author_name: this.authService.currentUser()!.nombre,
                 author_email: this.authService.currentUser()!.email
             });
-            this.reviewForm.get('author_name')?.disable(); // Optional: prevent changing name if logged in
-            // But API expects author_name in body, so we need to enable it before submit or handle in onSubmit
-            // For simplicity let's keep it enabled or handle it. 
-            // Better: keep it enabled so user can customize display name if they want, or disable and use rawValue.
+            this.reviewForm.get('author_name')?.disable(); // Opcional: evitar cambiar el nombre si el usuario está autenticado
+            // Pero la API espera author_name en el body, así que hay que habilitarlo antes del envío o manejarlo en onSubmit
+            // Por simplicidad, dejarlo habilitado o manejarlo.
+            // Mejor: dejarlo habilitado para que el usuario pueda personalizar el nombre, o deshabilitarlo y usar rawValue.
             this.reviewForm.get('author_name')?.enable();
         }
     }
@@ -193,15 +193,15 @@ export class ReviewsPageComponent implements OnInit {
         this.errorMessage.set('');
 
         const formData = this.reviewForm.value;
-        // If user is logged in, we might want to prioritize their current name if the field was disabled, 
-        // but since we left it enabled, value is there.
+        // Si el usuario está autenticado, podríamos priorizar su nombre actual si el campo estaba deshabilitado,
+        // pero como lo dejamos habilitado, el valor ya está disponible.
 
         this.http.post(this.apiUrl, formData, { withCredentials: true }).subscribe({
             next: () => {
                 this.submitting.set(false);
                 this.successMessage.set('¡Gracias por tu reseña! Será visible después de ser moderada.');
                 this.reviewForm.reset({ rating: 0 });
-                // If logged in, restore name
+                // Si está autenticado, restaurar nombre
                 if (this.authService.currentUser()) {
                     this.reviewForm.patchValue({
                         author_name: this.authService.currentUser()!.nombre,

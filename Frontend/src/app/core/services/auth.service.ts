@@ -20,6 +20,9 @@ export class AuthService {
   currentUser = signal<User | null>(null);
   isAuthenticated = signal(false);
 
+  private readyResolve!: () => void;
+  readonly ready: Promise<void> = new Promise(resolve => { this.readyResolve = resolve; });
+
   constructor() {
     this.checkSession();
   }
@@ -44,11 +47,11 @@ export class AuthService {
   }
 
   updateProfile(data: { nombre?: string, email?: string }): Observable<any> {
-    // Note: The backend route is /api/users/me, not /api/auth/me for updates
-    // We need to adjust the URL or use the ServiceController if we put it there. 
-    // But we put it in AuthController, so let's check index.php routes.
+    // Nota: La ruta del backend es /api/users/me, no /api/auth/me para actualizaciones
+    // Necesitamos ajustar la URL o usar el ServiceController si lo ponemos ahí.
+    // Pero está en AuthController, así que revisamos las rutas de index.php.
     // POST /api/auth/register, /api/auth/login...
-    // The new routes are PATCH api/users/me -> AuthController.updateProfile
+    // Las nuevas rutas son PATCH api/users/me -> AuthController.updateProfile
     return this.http.patch<any>(`${environment.apiUrl}/users/me`, data, { withCredentials: true }).pipe(
       tap(response => {
         if (response.user) {
@@ -64,8 +67,8 @@ export class AuthService {
 
   checkSession(): void {
     this.http.get<User>(`${this.apiUrl}/me`, { withCredentials: true }).subscribe({
-      next: (user) => this.setUser(user),
-      error: () => this.clearState()
+      next: (user) => { this.setUser(user); this.readyResolve(); },
+      error: () => { this.clearState(); this.readyResolve(); }
     });
   }
 

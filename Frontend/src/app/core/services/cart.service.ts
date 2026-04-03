@@ -9,7 +9,7 @@ export interface CartItem extends Service {
     providedIn: 'root'
 })
 export class CartService {
-    private readonly STORAGE_KEY = 'cart_items'; // Single key for all states
+    private readonly STORAGE_KEY = 'cart_items'; // Clave única para todos los estados
 
     cartItems = signal<CartItem[]>([]);
 
@@ -17,10 +17,10 @@ export class CartService {
     total = computed(() => this.cartItems().reduce((acc, item) => acc + (item.price * item.quantity), 0));
 
     constructor() {
-        // Initial load
+        // Carga inicial
         this.loadCart();
 
-        // Auto-save effect
+        // Efecto de guardado automático
         effect(() => {
             this.saveCart();
         });

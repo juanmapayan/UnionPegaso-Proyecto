@@ -13,23 +13,23 @@ export class ScrollRevealDirective implements OnInit, OnDestroy {
   constructor(private el: ElementRef) {}
 
   ngOnInit() {
-    // Add initial hidden state
+    // Agregar estado oculto inicial
     this.el.nativeElement.style.opacity = '0';
     this.el.nativeElement.style.transform = 'translateY(40px)';
     this.el.nativeElement.style.transition = `opacity 0.8s ease-out ${this.delay()}ms, transform 0.8s ease-out ${this.delay()}ms`;
 
-    // Create intersection observer
+    // Crear observer de intersección
     this.observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            // Element is visible, trigger animation
+            // El elemento es visible, activar animación
             setTimeout(() => {
               this.el.nativeElement.style.opacity = '1';
               this.el.nativeElement.style.transform = 'translateY(0)';
             }, 50);
             
-            // Optional: stop observing after animation
+            // Opcional: dejar de observar tras la animación
             this.observer?.unobserve(this.el.nativeElement);
           }
         });

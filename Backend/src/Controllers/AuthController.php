@@ -10,7 +10,7 @@ class AuthController {
     public function register() {
         $data = json_decode(file_get_contents('php://input'), true);
         
-        $name = $data['nombre'] ?? ''; // Backend expects 'nombre'
+        $name = $data['nombre'] ?? ''; // El backend espera 'nombre'
         $email = $data['email'] ?? '';
         $password = $data['password'] ?? '';
 
@@ -27,7 +27,7 @@ class AuthController {
              return;
         }
 
-        // Check if email exists
+        // Verificar si el email existe
         $stmt = $this->db->prepare("SELECT id FROM users WHERE email = ?");
         $stmt->execute([$email]);
         if ($stmt->fetch()) {
@@ -42,10 +42,11 @@ class AuthController {
         try {
             $stmt = $this->db->prepare("INSERT INTO users (nombre, email, password_hash, rol) VALUES (?, ?, ?, ?)");
             $stmt->execute([$name, $email, $passwordHash, $rol]);
-            
+
             $userId = $this->db->lastInsertId();
 
-            // Auto-login
+            // Inicio de sesión automático
+            session_regenerate_id(true);
             $_SESSION['user_id'] = $userId;
             $_SESSION['user_rol'] = $rol;
 
@@ -61,7 +62,7 @@ class AuthController {
             ]);
         } catch (Exception $e) {
             http_response_code(500);
-            echo json_encode(['error' => 'Error del servidor: ' . $e->getMessage()]);
+            echo json_encode(['error' => 'Error del servidor. Inténtalo más tarde.']);
         }
     }
 
@@ -82,6 +83,7 @@ class AuthController {
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($user && password_verify($password, $user['password_hash'])) {
+            session_regenerate_id(true);
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['user_rol'] = $user['rol'];
             
@@ -96,6 +98,7 @@ class AuthController {
                 ]
             ]);
         } else {
+            sleep(1);
             http_response_code(401);
             echo json_encode(['error' => 'Credenciales inválidas']);
         }
@@ -103,9 +106,9 @@ class AuthController {
 
     public function logout() {
         session_destroy();
-        // Clear session cookie implies functionality on client/server handling, 
-        // usually session_destroy is enough server side. 
-        // We can also expire the cookie to be sure.
+        // Limpiar la cookie de sesión implica funcionalidad en cliente/servidor,
+        // normalmente session_destroy es suficiente en el lado del servidor.
+        // También podemos expirar la cookie para mayor seguridad.
         if (ini_get("session.use_cookies")) {
             $params = session_get_cookie_params();
             setcookie(session_name(), '', time() - 42000,
@@ -153,14 +156,14 @@ class AuthController {
         }
 
         try {
-            // Start transaction
+            // Iniciar transacción
             $this->db->beginTransaction();
 
             $updates = [];
             $params = [];
 
             if ($email) {
-                // Check if email is taken by another user
+                // Verificar si el email ya está en uso por otro usuario
                 $stmt = $this->db->prepare("SELECT id FROM users WHERE email = ? AND id != ?");
                 $stmt->execute([$email, $_SESSION['user_id']]);
                 if ($stmt->fetch()) {
@@ -187,7 +190,7 @@ class AuthController {
 
             $this->db->commit();
 
-            // Fetch updated user
+            // Obtener usuario actualizado
             $stmt = $this->db->prepare("SELECT id, nombre, email, rol FROM users WHERE id = ?");
             $stmt->execute([$_SESSION['user_id']]);
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -197,7 +200,7 @@ class AuthController {
         } catch (Exception $e) {
             $this->db->rollBack();
             http_response_code(500);
-            echo json_encode(['error' => 'Error al actualizar perfil: ' . $e->getMessage()]);
+            echo json_encode(['error' => 'Error al actualizar perfil. Inténtalo más tarde.']);
         }
     }
 
@@ -225,7 +228,7 @@ class AuthController {
             return;
         }
 
-        // Verify current password
+        // Verificar contraseña actual
         $stmt = $this->db->prepare("SELECT password_hash FROM users WHERE id = ?");
         $stmt->execute([$_SESSION['user_id']]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -236,7 +239,7 @@ class AuthController {
             return;
         }
 
-        // Update password
+        // Actualizar contraseña
         $newHash = password_hash($newPassword, PASSWORD_DEFAULT);
         $stmt = $this->db->prepare("UPDATE users SET password_hash = ? WHERE id = ?");
         $stmt->execute([$newHash, $_SESSION['user_id']]);

@@ -8,6 +8,8 @@ interface Service {
     title: string;
     description: string;
     price: string;
+    icon_key: string | null;
+    featured: number;
     is_active: boolean | number;
     display_order: number;
     created_at: string;
@@ -85,6 +87,10 @@ interface Service {
                         <label class="block text-sm font-medium text-gray-400 mb-1">Descripción</label>
                         <textarea formControlName="description" rows="3" class="w-full px-4 py-2 bg-black/30 border border-purple-500/20 rounded-lg text-white focus:outline-none focus:border-purple-500"></textarea>
                     </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-400 mb-1">Icono (icon_key)</label>
+                        <input type="text" formControlName="icon_key" placeholder="p.ej. code, design, video" class="w-full px-4 py-2 bg-black/30 border border-purple-500/20 rounded-lg text-white focus:outline-none focus:border-purple-500">
+                    </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-400 mb-1">Precio</label>
@@ -98,6 +104,10 @@ interface Service {
                             <label class="flex items-center gap-2 cursor-pointer mt-5">
                                 <input type="checkbox" formControlName="is_active" class="form-checkbox bg-black/30 border-purple-500/20 text-purple-600 rounded">
                                 <span class="text-sm text-gray-400">Activo</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer mt-5">
+                                <input type="checkbox" formControlName="featured" class="form-checkbox bg-black/30 border-purple-500/20 text-purple-600 rounded">
+                                <span class="text-sm text-gray-400">Destacado</span>
                             </label>
                         </div>
                     </div>
@@ -129,11 +139,13 @@ export class AdminServicesListComponent implements OnInit {
         title: ['', Validators.required],
         description: [''],
         price: [0, [Validators.required, Validators.min(0)]],
+        icon_key: [''],
         is_active: [true],
+        featured: [false],
         display_order: [0]
     });
 
-    // Admin services API resource. Relative to AdminApiService base `/admin`.
+    // Recurso API de servicios admin. Relativo a la base /admin de AdminApiService.
     private readonly resourcePath = 'services';
 
     ngOnInit() {
@@ -141,7 +153,7 @@ export class AdminServicesListComponent implements OnInit {
     }
 
     loadServices() {
-        this.adminApi.get<Service[]>(this.resourcePath, { withCredentials: true }).subscribe({
+        this.adminApi.get<Service[]>(this.resourcePath).subscribe({
             next: (data) => this.services.set(data),
             error: (err) => console.error('Error loading services', err)
         });
@@ -150,7 +162,7 @@ export class AdminServicesListComponent implements OnInit {
     openCreateModal() {
         this.isEditing.set(false);
         this.currentId.set(null);
-        this.serviceForm.reset({ is_active: true, price: 0, display_order: 0 });
+        this.serviceForm.reset({ is_active: true, price: 0, display_order: 0, icon_key: '', featured: false });
         this.showModal.set(true);
     }
 
@@ -161,7 +173,9 @@ export class AdminServicesListComponent implements OnInit {
             title: service.title,
             description: service.description,
             price: parseFloat(service.price),
+            icon_key: service.icon_key ?? '',
             is_active: !!service.is_active,
+            featured: !!service.featured,
             display_order: service.display_order
         });
         this.showModal.set(true);
@@ -178,8 +192,8 @@ export class AdminServicesListComponent implements OnInit {
         const data = this.serviceForm.value;
 
         const request = this.isEditing()
-            ? this.adminApi.patch(`${this.resourcePath}/${this.currentId()}`, data, { withCredentials: true })
-            : this.adminApi.post(this.resourcePath, data, { withCredentials: true });
+            ? this.adminApi.patch(`${this.resourcePath}/${this.currentId()}`, data)
+            : this.adminApi.post(this.resourcePath, data);
 
         request.subscribe({
             next: () => {
@@ -198,7 +212,7 @@ export class AdminServicesListComponent implements OnInit {
     deleteService(id: number) {
         if (!confirm('¿Estás seguro de eliminar este servicio?')) return;
 
-        this.adminApi.delete(`${this.resourcePath}/${id}`, { withCredentials: true }).subscribe({
+        this.adminApi.delete(`${this.resourcePath}/${id}`).subscribe({
             next: () => this.loadServices(),
             error: (err) => {
                 console.error('Error deleting service', err);

@@ -1,13 +1,14 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable, catchError, throwError } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
     providedIn: 'root'
 })
 export class ApiService {
     private http = inject(HttpClient);
-    private baseUrl = 'http://localhost:8000/api'; // Centralized configuration
+    private baseUrl = environment.apiUrl; // Configuración centralizada
 
     constructor() { }
 
@@ -16,19 +17,19 @@ export class ApiService {
             'Content-Type': 'application/json',
             'Accept': 'application/json'
         });
-        // Add auth token if needed in the future
+        // Agregar token de autenticación si se necesita en el futuro
         return headers;
     }
 
     private handleError(error: HttpErrorResponse) {
-        console.error('ApiService Error Full Object:', error); // Log full error object
+        console.error('ApiService Error Full Object:', error); // Registrar el objeto de error completo
         let errorMessage = 'An unknown error occurred!';
         if (error.error instanceof ErrorEvent) {
-            // Client-side or network error
+            // Error del lado del cliente o de red
             errorMessage = `Error: ${error.error.message}`;
         } else {
-            // Backend returned an unsuccessful response code
-            // The response body may contain clues as to what went wrong
+            // El backend devolvió un código de respuesta no exitoso
+            // El cuerpo de la respuesta puede contener pistas sobre lo que salió mal
             errorMessage = `Error Code: ${error.status}\nMessage: ${error.message}`;
             if (error.error && error.error.error) {
                 errorMessage = error.error.error;
@@ -40,7 +41,6 @@ export class ApiService {
 
     get<T>(path: string, params: HttpParams = new HttpParams()): Observable<T> {
         const url = `${this.baseUrl}/${path}`;
-        console.log(`ApiService: Calling GET ${url}`, params); // Log URL
         return this.http.get<T>(url, { headers: this.getHeaders(), params })
             .pipe(catchError(this.handleError));
     }

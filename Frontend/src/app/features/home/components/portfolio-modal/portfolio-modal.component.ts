@@ -2,9 +2,8 @@ import { Component, ElementRef, HostListener, ViewChild, inject } from '@angular
 import { CommonModule } from '@angular/common';
 import { animate, style, transition, trigger } from '@angular/animations';
 import { PortfolioModalService } from '../../../../core/services/portfolio-modal.service';
-import { PortfolioItem } from '../../data/portfolio.data';
-
-type VideoOrientation = 'portrait' | 'landscape' | 'square';
+import { PortfolioItem } from '../../../portfolio/models/portfolio-item.model';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'app-portfolio-modal',
@@ -34,7 +33,7 @@ export class PortfolioModalComponent {
   modalService = inject(PortfolioModalService);
   @ViewChild('videoPlayer') videoPlayer?: ElementRef<HTMLVideoElement>;
 
-  // Keyboard support for Modal
+  // Soporte de teclado para el Modal
   @HostListener('document:keydown', ['$event'])
   onKeydown(event: KeyboardEvent) {
     if (event.key === 'Escape' && this.modalService.isOpen()) {
@@ -43,7 +42,7 @@ export class PortfolioModalComponent {
   }
 
   closeModal() {
-    // Reset Video if present
+    // Restablecer video si existe
     if (this.videoPlayer?.nativeElement) {
       const video = this.videoPlayer.nativeElement;
       video.pause();
@@ -55,6 +54,17 @@ export class PortfolioModalComponent {
   }
 
   getPosterForItem(item: PortfolioItem): string {
-    return item.poster || item.src;
+    if (item.poster_url) return item.poster_url;
+    if (item.type === 'video') return '';
+    return item.media_url;
+  }
+
+  resolveUrl(path: string | null | undefined): string {
+    if (!path) return '';
+    if (path.startsWith('http://') || path.startsWith('https://')) return path;
+    const base = environment.apiUrl.replace('/api', '');
+    if (path.startsWith('/uploads/')) return base + path;
+    if (path.startsWith('uploads/')) return base + '/' + path;
+    return path;
   }
 }
