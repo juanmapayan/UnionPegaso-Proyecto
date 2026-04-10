@@ -14,8 +14,8 @@ if (getenv('APP_ENV') === 'development') {
 header('Content-Type: application/json; charset=utf-8');
 
 require_once __DIR__ . '/../config/config.php';
-require_once __DIR__ . '/../src/Database.php';
-require_once __DIR__ . '/../src/Router.php';
+require_once __DIR__ . '/../src/BaseDatos.php';
+require_once __DIR__ . '/../src/Enrutador.php';
 
 // Manejo de CORS
 $config = require __DIR__ . '/../config/config.php';
@@ -42,15 +42,12 @@ if (getenv('APP_ENV') !== 'development') {
 }
 session_start();
 
-// Inicializar Router
-$router = new Router();
-
-// Definir Controladores (Autoloading sería mejor, pero lo mantenemos simple)
-// Requeriremos los controladores aquí conforme los implementemos
+// Inicializar Enrutador
+$router = new Enrutador();
 
 
-require_once __DIR__ . '/../src/Controllers/AuthController.php';
-$authController = new AuthController();
+require_once __DIR__ . '/../src/Controladores/ControladorAutenticacion.php';
+$authController = new ControladorAutenticacion();
 
 $router->add('POST', 'api/auth/register', [$authController, 'register']);
 $router->add('POST', 'api/auth/login', [$authController, 'login']);
@@ -59,43 +56,21 @@ $router->add('GET', 'api/auth/me', [$authController, 'me']);
 $router->add('PATCH', 'api/users/me', [$authController, 'updateProfile']);
 $router->add('PATCH', 'api/users/me/password', [$authController, 'updatePassword']);
 
-require_once __DIR__ . '/../src/Controllers/ServiceController.php';
-$serviceController = new ServiceController();
 
-$router->add('GET', 'api/services', [$serviceController, 'index']);
-$router->add('GET', 'api/services/{id}', [$serviceController, 'show']);
-
-// --- Admin Routes ---
-require_once __DIR__ . '/../src/Controllers/AdminController.php';
-$adminController = new AdminController();
+// Web public controler (Services, Cases, Portfolio, Leads, Reviews)
+require_once __DIR__ . '/../src/Controladores/ControladorWeb.php';
+$webController = new ControladorWeb();
 
 // Servicios
-$router->add('GET', 'api/admin/services', [$adminController, 'indexServices']);
-$router->add('POST', 'api/admin/services', [$adminController, 'createService']);
-$router->add('PATCH', 'api/admin/services/{id}', [$adminController, 'updateService']);
-$router->add('PUT', 'api/admin/services/{id}', [$adminController, 'updateService']);
-$router->add('DELETE', 'api/admin/services/{id}', [$adminController, 'deleteService']);
-
-$router->add('GET', 'api/admin/cases', [$adminController, 'indexCases']);
-$router->add('POST', 'api/admin/cases', [$adminController, 'createCase']);
-$router->add('PATCH', 'api/admin/cases/{id}', [$adminController, 'updateCase']);
-$router->add('PUT', 'api/admin/cases/{id}', [$adminController, 'updateCase']);
-$router->add('DELETE', 'api/admin/cases/{id}', [$adminController, 'deleteCase']);
-
+$router->add('GET', 'api/services', [$webController, 'indexServices']);
+$router->add('GET', 'api/services/{id}', [$webController, 'showService']);
 // Casos de éxito
-require_once __DIR__ . '/../src/Controllers/SuccessCaseController.php';
-$successCaseController = new SuccessCaseController();
-
-
-
-$router->add('GET', 'api/cases', [$successCaseController, 'index']);
-$router->add('GET', 'api/cases/{slug}', [$successCaseController, 'show']);
-
+$router->add('GET', 'api/cases', [$webController, 'indexSuccessCases']);
+$router->add('GET', 'api/cases/{slug}', [$webController, 'showSuccessCase']);
 // Portafolio
-require_once __DIR__ . '/../src/Controllers/PortfolioController.php';
-$portfolioController = new PortfolioController();
-
-$router->add('GET', 'api/portfolio', [$portfolioController, 'index']);
+$router->add('GET', 'api/portfolio', [$webController, 'indexPortfolio']);
+// Leads
+$router->add('POST', 'api/leads', [$webController, 'createLead']);
 
 $router->add('GET', 'api', function() {
     http_response_code(200);
@@ -106,21 +81,36 @@ $router->add('GET', '/', function() {
     echo json_encode(['message' => 'Union Pegaso API']);
 });
 
-require_once __DIR__ . '/../src/Controllers/LeadController.php';
-$leadController = new LeadController();
-$router->add('POST', 'api/leads', [$leadController, 'create']);
+
+// --- Admin Routes ---
+require_once __DIR__ . '/../src/Controladores/ControladorAdmin.php';
+$adminController = new ControladorAdmin();
 
 $router->add('GET',    'api/admin/dashboard',        [$adminController, 'indexDashboard']);
 $router->add('GET',    'api/admin/leads',            [$adminController, 'indexLeads']);
 $router->add('PATCH',  'api/admin/leads/{id}',       [$adminController, 'updateLeadStatus']);
 
-// Portafolio
-$router->add('POST',   'api/admin/upload',             [$adminController, 'uploadMedia']);
+// Servicios Admin
+$router->add('GET', 'api/admin/services', [$adminController, 'indexServices']);
+$router->add('POST', 'api/admin/services', [$adminController, 'createService']);
+$router->add('PATCH', 'api/admin/services/{id}', [$adminController, 'updateService']);
+$router->add('PUT', 'api/admin/services/{id}', [$adminController, 'updateService']);
+$router->add('DELETE', 'api/admin/services/{id}', [$adminController, 'deleteService']);
 
+// Casos de éxito Admin
+$router->add('GET', 'api/admin/cases', [$adminController, 'indexCases']);
+$router->add('POST', 'api/admin/cases', [$adminController, 'createCase']);
+$router->add('PATCH', 'api/admin/cases/{id}', [$adminController, 'updateCase']);
+$router->add('PUT', 'api/admin/cases/{id}', [$adminController, 'updateCase']);
+$router->add('DELETE', 'api/admin/cases/{id}', [$adminController, 'deleteCase']);
+
+// Portafolio Admin
+$router->add('POST',   'api/admin/upload',             [$adminController, 'uploadMedia']);
 $router->add('GET',    'api/admin/portfolio',         [$adminController, 'indexPortfolio']);
 $router->add('POST',   'api/admin/portfolio',         [$adminController, 'createPortfolio']);
 $router->add('PATCH',  'api/admin/portfolio/{id}',    [$adminController, 'updatePortfolio']);
 $router->add('PUT',    'api/admin/portfolio/{id}',    [$adminController, 'updatePortfolio']);
 $router->add('DELETE', 'api/admin/portfolio/{id}',    [$adminController, 'deletePortfolio']);
+
 
 $router->dispatch($_SERVER['REQUEST_METHOD'], $_SERVER['REQUEST_URI']);

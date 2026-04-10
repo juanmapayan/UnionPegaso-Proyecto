@@ -24,10 +24,10 @@
     "baseUrl": "./src",
     "paths": {
       "@/*": ["./*"],
-      "@core/*": ["app/core/*"],
-      "@shared": ["app/shared/index.ts"],
-      "@shared/*": ["app/shared/*"],
-      "@features/*": ["app/features/*"]
+      "@nucleo/*": ["app/nucleo/*"],
+      "@compartido": ["app/compartido/index.ts"],
+      "@compartido/*": ["app/compartido/*"],
+      "@paginas/*": ["app/paginas/*"]
     }
   },
   "angularCompilerOptions": {

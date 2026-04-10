@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { ServiceDetailsModalComponent } from './shared/components/service-details-modal/service-details-modal.component';
-import { PortfolioModalComponent } from './features/home/components/portfolio-modal/portfolio-modal.component';
-import { ModalService } from './core/services';
+import { ServiceDetailsModalComponent } from './compartido/components/service-details-modal/service-details-modal.component';
+import { PortfolioModalComponent } from './paginas/inicio/components/portfolio-modal/portfolio-modal.component';
+import { ModalService } from './nucleo/servicios';
 
 @Component({
   selector: 'app-root',

@@ -3,9 +3,17 @@ require_once __DIR__ . '/../src/Database.php';
 
 try {
     $db = Database::getInstance()->getConnection();
-    $sql = file_get_contents(__DIR__ . '/../migrations/001_admin_tables.sql');
-    $db->exec($sql);
-    echo "Migration executed successfully.\n";
+
+    $migrationFiles = glob(__DIR__ . '/../migrations/*.sql');
+    sort($migrationFiles);
+
+    foreach ($migrationFiles as $file) {
+        echo "Running: " . basename($file) . PHP_EOL;
+        $sql = file_get_contents($file);
+        $db->exec($sql);
+    }
+
+    echo "All migrations executed successfully." . PHP_EOL;
 } catch (Exception $e) {
-    echo "Error: " . $e->getMessage() . "\n";
+    echo "Error: " . $e->getMessage() . PHP_EOL;
 }
