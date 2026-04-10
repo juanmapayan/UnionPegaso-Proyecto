@@ -1,0 +1,47 @@
+<!-- MODAL / LIGHTBOX -->
+@if (modalService.isOpen() && modalService.selectedItem(); as current) {
+<div
+  class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 overflow-y-auto"
+  (click)="closeModal()" [@modalFade]>
+
+  <!-- Contenedor de contenido -->
+  <div class="relative w-full max-w-6xl max-h-[90vh] flex flex-col items-center justify-center outline-none my-auto"
+    (click)="$event.stopPropagation()" [@modalScale]>
+
+    <!-- Botón de cerrar (dentro del contenedor para ser accesible) -->
+    <button
+      class="absolute -top-12 right-0 z-50 p-2 text-white/70 hover:text-white transition-colors bg-black/20 hover:bg-black/40 rounded-full backdrop-blur-sm"
+      (click)="closeModal()" aria-label="Cerrar modal">
+      <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+
+    @if (current.type === 'video') {
+    <!-- Contenedor de video -->
+    <div class="relative w-full overflow-hidden rounded-lg shadow-2xl bg-black" [ngClass]="{
+            'aspect-[9/16] max-w-[400px]': current.orientation === 'vertical',
+            'aspect-video max-w-5xl': current.orientation === 'horizontal' || !current.orientation,
+            'aspect-square max-w-xl': current.orientation === 'square'
+          }">
+      <video #videoPlayer [src]="resolveUrl(current.src)" [poster]="resolveUrl(getPosterForItem(current))"
+        class="w-full h-full object-contain bg-black" controls playsinline preload="metadata" autoplay muted></video>
+    </div>
+    } @else {
+    <!-- Contenedor de imagen -->
+    <img [src]="resolveUrl(current.src)" [alt]="current.title"
+      class="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl bg-[#050505]">
+    }
+
+    <!-- Pie de foto (Opcional) -->
+    @if (current.title) {
+    <div class="mt-4 text-center">
+      <h3 class="text-white font-bold text-xl">{{ current.title }}</h3>
+      @if (current.description) {
+      <p class="text-gray-400 text-sm mt-1 max-w-2xl mx-auto">{{ current.description }}</p>
+      }
+    </div>
+    }
+  </div>
+</div>
+}
