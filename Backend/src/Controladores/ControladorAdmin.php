@@ -1023,13 +1023,17 @@ class ControladorAdmin {
 
         $file = $_FILES['file'];
 
-        $allowedMimes = ['image/jpeg', 'image/png', 'image/webp', 'video/mp4'];
+        $allowedMimes = [
+            'image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/bmp', 
+            'video/mp4', 'video/webm'
+        ];
+        
         $finfo = new finfo(FILEINFO_MIME_TYPE);
         $mime  = $finfo->file($file['tmp_name']);
 
         if (!in_array($mime, $allowedMimes)) {
             http_response_code(400);
-            echo json_encode(['error' => 'Tipo de archivo no permitido. Usa JPG, PNG, WebP o MP4.']);
+            echo json_encode(['error' => 'Tipo de archivo no permitido. Asegúrate de usar imágenes o videos MP4/WebM.']);
             return;
         }
 
@@ -1039,25 +1043,72 @@ class ControladorAdmin {
             return;
         }
 
-        $extensions = [
-            'image/jpeg' => 'jpg',
-            'image/png'  => 'png',
-            'image/webp' => 'webp',
-            'video/mp4'  => 'mp4',
-        ];
-
-        $ext       = $extensions[$mime];
-        $filename  = uniqid('media_', true) . '.' . $ext;
         $uploadDir = __DIR__ . '/../../public/uploads/';
-
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0755, true);
         }
 
-        if (!move_uploaded_file($file['tmp_name'], $uploadDir . $filename)) {
-            http_response_code(500);
-            echo json_encode(['error' => 'No se pudo guardar el archivo en el servidor']);
-            return;
+        $isImage = strpos($mime, 'image/') === 0;
+
+        if ($isImage) {
+            // Convertir cualquier imagen a WebP
+            $filename = uniqid('media_', true) . '.webp';
+            $destinationPath = $uploadDir . $filename;
+            
+            $image = null;
+            switch ($mime) {
+                case 'image/jpeg':
+                    $image = @imagecreatefromjpeg($file['tmp_name']);
+                    break;
+                case 'image/png':
+                    $image = @imagecreatefrompng($file['tmp_name']);
+                    break;
+                case 'image/gif':
+                    $image = @imagecreatefromgif($file['tmp_name']);
+                    break;
+                case 'image/bmp':
+                    $image = @imagecreatefrombmp($file['tmp_name']);
+                    break;
+                case 'image/webp':
+                    $image = @imagecreatefromwebp($file['tmp_name']);
+                    break;
+            }
+
+            if ($image) {
+                // Manejar transparencia para PNG y GIF
+                if ($mime == 'image/png' || $mime == 'image/gif' || $mime == 'image/webp') {
+                    imagepalettetotruecolor($image);
+                    imagealphablending($image, true);
+                    imagesavealpha($image, true);
+                }
+
+                $success = imagewebp($image, $destinationPath, 85);
+                imagedestroy($image);
+
+                if (!$success) {
+                    http_response_code(500);
+                    echo json_encode(['error' => 'No se pudo procesar la imagen a WebP']);
+                    return;
+                }
+            } else {
+                http_response_code(500);
+                echo json_encode(['error' => 'El formato de imagen es inválido o está corrupto']);
+                return;
+            }
+        } else {
+            // Guardar videos intactos
+            $extensions = [
+                'video/mp4'  => 'mp4',
+                'video/webm' => 'webm',
+            ];
+            $ext = $extensions[$mime];
+            $filename = uniqid('media_', true) . '.' . $ext;
+            
+            if (!move_uploaded_file($file['tmp_name'], $uploadDir . $filename)) {
+                http_response_code(500);
+                echo json_encode(['error' => 'No se pudo guardar el vídeo en el servidor']);
+                return;
+            }
         }
 
         echo json_encode(['url' => '/uploads/' . $filename]);

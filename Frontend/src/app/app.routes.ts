@@ -34,6 +34,14 @@ export const routes: Routes = [
       {
         path: '',
         loadChildren: () => import('./paginas/acceso/acceso.routes').then(m => m.AUTH_ROUTES)
+      },
+      {
+        path: 'perfil',
+        loadComponent: () => import('./paginas/perfil/perfil').then(m => m.Perfil)
+      },
+      {
+        path: 'mis-servicios',
+        loadComponent: () => import('./paginas/mis-servicios/mis-servicios').then(m => m.MisServicios)
       }
     ]
   },

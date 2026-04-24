@@ -72,6 +72,14 @@ export class AuthService {
     });
   }
 
+  getMyServices(): Observable<any[]> {
+    return this.http.get<any[]>(`${environment.apiUrl}/users/me/services`, { withCredentials: true });
+  }
+
+  addReview(data: { rating: number, comment: string, service_id: number }): Observable<any> {
+    return this.http.post<any>(`${environment.apiUrl}/users/me/reviews`, data, { withCredentials: true });
+  }
+
   private setUser(user: User) {
     this.currentUser.set(user);
     this.isAuthenticated.set(true);
