@@ -25,7 +25,7 @@ class BaseDatos {
 
     public static function getInstance() {
         if (self::$instance == null) {
-            self::$instance = new Database();
+            self::$instance = new BaseDatos();
         }
         return self::$instance;
     }

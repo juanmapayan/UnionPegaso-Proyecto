@@ -56,6 +56,12 @@ $router->add('GET', 'api/auth/me', [$authController, 'me']);
 $router->add('PATCH', 'api/users/me', [$authController, 'updateProfile']);
 $router->add('PATCH', 'api/users/me/password', [$authController, 'updatePassword']);
 
+// Rutas de Usuario (Mis Servicios y Reseñas)
+require_once __DIR__ . '/../src/Controladores/ControladorUsuario.php';
+$usuarioController = new ControladorUsuario();
+$router->add('GET', 'api/users/me/services', [$usuarioController, 'myServices']);
+$router->add('POST', 'api/users/me/reviews', [$usuarioController, 'addReview']);
+
 
 // Web public controler (Services, Cases, Portfolio, Leads, Reviews)
 require_once __DIR__ . '/../src/Controladores/ControladorWeb.php';
@@ -111,6 +117,10 @@ $router->add('POST',   'api/admin/portfolio',         [$adminController, 'create
 $router->add('PATCH',  'api/admin/portfolio/{id}',    [$adminController, 'updatePortfolio']);
 $router->add('PUT',    'api/admin/portfolio/{id}',    [$adminController, 'updatePortfolio']);
 $router->add('DELETE', 'api/admin/portfolio/{id}',    [$adminController, 'deletePortfolio']);
+
+// Reseñas Admin
+$router->add('GET', 'api/admin/reviews', [$adminController, 'indexReviews']);
+$router->add('DELETE', 'api/admin/reviews/{id}', [$adminController, 'deleteReview']);
 
 
 $router->dispatch($_SERVER['REQUEST_METHOD'], $_SERVER['REQUEST_URI']);

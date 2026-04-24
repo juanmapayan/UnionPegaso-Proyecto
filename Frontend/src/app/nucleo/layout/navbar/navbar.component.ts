@@ -21,6 +21,7 @@ export class NavbarComponent {
 
   isScrolled = signal(false);
   mobileMenuOpen = signal(false);
+  userMenuOpen = signal(false);
 
   @HostListener('window:scroll')
   onWindowScroll() {
@@ -33,6 +34,14 @@ export class NavbarComponent {
 
   closeMobileMenu() {
     this.mobileMenuOpen.set(false);
+  }
+
+  toggleUserMenu() {
+    this.userMenuOpen.update(v => !v);
+  }
+
+  closeUserMenu() {
+    this.userMenuOpen.set(false);
   }
 
   scrollToTop() {

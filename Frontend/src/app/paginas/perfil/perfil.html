@@ -1,0 +1,82 @@
+<div class="min-h-screen bg-[#050505] pt-32 pb-20 relative overflow-hidden">
+  <!-- Grid background similar to auth pages -->
+  <div class="absolute inset-0 bg-[url('assets/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))] opacity-5"></div>
+
+  <div class="container mx-auto px-6 relative z-10">
+    <div class="max-w-2xl mx-auto">
+      <h1 class="text-3xl md:text-4xl font-display font-bold text-white mb-2 tracking-tight">Mi Perfil</h1>
+      <p class="text-zinc-400 mb-8">Administra los datos de tu cuenta.</p>
+
+      <div class="bg-white/5 border border-white/10 rounded-2xl p-6 md:p-8 backdrop-blur-sm mb-8 relative overflow-hidden group">
+        <div class="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+
+        <h2 class="text-xl font-semibold text-white mb-6">Datos Personales</h2>
+        
+        <form (ngSubmit)="updateProfile()" class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-400 mb-2">Nombre Completo</label>
+            <input type="text" [value]="authService.currentUser()?.nombre" disabled
+              class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-gray-500 cursor-not-allowed focus:outline-none">
+            <p class="text-xs text-zinc-500 mt-2">El nombre no se puede modificar.</p>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-2">Correo Electrónico</label>
+            <input type="email" [ngModel]="email()" (ngModelChange)="email.set($event)" name="email" required
+              class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500/50 focus:bg-white/10 transition-all">
+          </div>
+
+          <div class="pt-2">
+            <button type="submit"
+              class="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-500 hover:to-purple-400 text-white font-medium rounded-xl transition-all shadow-[0_0_15px_rgba(147,51,234,0.3)] hover:shadow-[0_0_25px_rgba(147,51,234,0.5)]">
+              Actualizar Datos
+            </button>
+          </div>
+
+          @if (profileMessage()) {
+            <p class="text-sm mt-4 p-3 rounded-lg bg-white/5 border border-white/10"
+               [class.text-green-400]="profileMessage().includes('correctamente')"
+               [class.text-red-400]="!profileMessage().includes('correctamente')">
+              {{ profileMessage() }}
+            </p>
+          }
+        </form>
+      </div>
+
+      <div class="bg-white/5 border border-white/10 rounded-2xl p-6 md:p-8 backdrop-blur-sm relative overflow-hidden group">
+        <div class="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+
+        <h2 class="text-xl font-semibold text-white mb-6">Cambiar Contraseña</h2>
+        
+        <form (ngSubmit)="updatePassword()" class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-2">Contraseña Actual</label>
+            <input type="password" [ngModel]="currentPassword()" (ngModelChange)="currentPassword.set($event)" name="current" required
+              class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500/50 focus:bg-white/10 transition-all">
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-2">Nueva Contraseña</label>
+            <input type="password" [ngModel]="newPassword()" (ngModelChange)="newPassword.set($event)" name="new" required
+              class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500/50 focus:bg-white/10 transition-all">
+          </div>
+
+          <div class="pt-2">
+            <button type="submit"
+              class="w-full sm:w-auto px-6 py-3 border border-white/20 hover:border-white/40 hover:bg-white/5 text-white font-medium rounded-xl transition-all">
+              Actualizar Contraseña
+            </button>
+          </div>
+
+          @if (passwordMessage()) {
+            <p class="text-sm mt-4 p-3 rounded-lg bg-white/5 border border-white/10"
+               [class.text-green-400]="passwordMessage().includes('correctamente')"
+               [class.text-red-400]="!passwordMessage().includes('correctamente')">
+              {{ passwordMessage() }}
+            </p>
+          }
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

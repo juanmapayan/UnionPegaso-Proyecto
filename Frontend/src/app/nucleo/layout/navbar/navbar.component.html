@@ -27,12 +27,24 @@
         <a routerLink="/login" class="hidden md:inline-flex text-sm font-medium text-gray-300 hover:text-white transition-colors">Iniciar Sesión</a>
         <a routerLink="/register" class="hidden md:inline-flex px-4 py-2 border border-purple-500/60 text-purple-400 hover:bg-purple-500/10 text-sm font-medium rounded-full transition-all">Registro</a>
       } @else {
-        @if (authService.currentUser()?.rol === 'admin') {
-          <a routerLink="/admin" class="hidden md:inline-flex px-4 py-2 border border-white/30 text-gray-300 hover:border-white/60 hover:text-white text-sm font-medium rounded-full transition-all">Panel Admin</a>
-        } @else {
-          <a routerLink="/perfil" class="hidden md:inline-flex text-sm font-medium text-gray-300 hover:text-white transition-colors">Perfil</a>
-        }
-        <button (click)="authService.logout()" class="hidden md:inline-flex text-sm font-medium text-gray-400 hover:text-white transition-colors">Salir</button>
+        <div class="relative hidden md:block">
+          <button (click)="toggleUserMenu()" class="flex items-center gap-2 px-3 py-2 border border-white/10 hover:bg-white/5 rounded-full transition-all">
+            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"/></svg>
+            <span class="text-sm font-medium text-gray-300">{{ authService.currentUser()?.nombre || 'Mi perfil' }}</span>
+          </button>
+          
+          @if (userMenuOpen()) {
+            <div class="absolute right-0 mt-2 w-48 bg-[#0a0a0a] border border-white/10 rounded-xl shadow-2xl py-2 flex flex-col gap-1 z-50 animate-in fade-in zoom-in-95">
+              @if (authService.currentUser()?.rol === 'admin') {
+                <a routerLink="/admin" (click)="closeUserMenu()" class="px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-colors text-left">Panel Admin</a>
+              }
+              <a routerLink="/perfil" (click)="closeUserMenu()" class="px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-colors text-left">Mi perfil</a>
+              <a routerLink="/mis-servicios" (click)="closeUserMenu()" class="px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-colors text-left">Mis servicios</a>
+              <hr class="border-white/10 my-1">
+              <button (click)="authService.logout(); closeUserMenu()" class="px-4 py-2 text-sm text-red-400 hover:text-red-300 hover:bg-red-400/10 transition-colors text-left w-full">Cerrar sesión</button>
+            </div>
+          }
+        </div>
       }
 
       <a routerLink="/presupuesto"
@@ -73,15 +85,19 @@
       <a (click)="closeMobileMenu()" routerLink="/register"
         class="text-left text-base font-medium text-purple-400 hover:text-purple-300">Registro</a>
     } @else {
-      @if (authService.currentUser()?.rol === 'admin') {
-        <a (click)="closeMobileMenu()" routerLink="/admin"
-          class="text-left text-base font-medium text-gray-300 hover:text-white">Panel Admin</a>
-      } @else {
+      <div class="flex flex-col gap-4 pl-2 border-l border-white/10">
+        <span class="text-sm font-semibold text-purple-400 uppercase tracking-wider">Cuenta</span>
+        @if (authService.currentUser()?.rol === 'admin') {
+          <a (click)="closeMobileMenu()" routerLink="/admin"
+            class="text-left text-base font-medium text-gray-300 hover:text-white">Panel Admin</a>
+        }
         <a (click)="closeMobileMenu()" routerLink="/perfil"
-          class="text-left text-base font-medium text-gray-300 hover:text-white">Perfil</a>
-      }
-      <button (click)="authService.logout(); closeMobileMenu()"
-        class="text-left text-base font-medium text-gray-400 hover:text-white">Salir</button>
+          class="text-left text-base font-medium text-gray-300 hover:text-white">Mi perfil</a>
+        <a (click)="closeMobileMenu()" routerLink="/mis-servicios"
+          class="text-left text-base font-medium text-gray-300 hover:text-white">Mis servicios</a>
+        <button (click)="authService.logout(); closeMobileMenu()"
+          class="text-left text-base font-medium text-red-400 hover:text-red-300">Cerrar sesión</button>
+      </div>
     }
 
     <hr class="border-white/10 my-2">
