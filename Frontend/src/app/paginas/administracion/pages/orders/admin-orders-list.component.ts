@@ -71,7 +71,7 @@ interface Order {
                                 </span>
                             </td>
                             <td class="px-6 py-4 text-right">
-                                <a [routerLink]="['/administracion/orders', order.id]" class="text-purple-400 hover:text-purple-300 transition-colors">Ver Detalle</a>
+                                <a [routerLink]="['/admin/orders', order.id]" class="text-purple-400 hover:text-purple-300 transition-colors">Ver Detalle</a>
                             </td>
                         </tr>
                     } @empty {
@@ -90,11 +90,11 @@ export class AdminOrdersListComponent implements OnInit {
     http = inject(HttpClient);
 
     orders = signal<Order[]>([]);
-    filterStatus = signal('');
-    searchQuery = signal('');
+    filterStatus = '';
+    searchQuery = '';
     loading = signal(false);
 
-    private apiUrl = `${environment.apiUrl}/administracion/orders`;
+    private apiUrl = `${environment.apiUrl}/admin/orders`;
 
     ngOnInit() {
         this.loadOrders();
@@ -103,8 +103,8 @@ export class AdminOrdersListComponent implements OnInit {
     loadOrders() {
         this.loading.set(true);
         const params: any = {};
-        if (this.filterStatus()) params.status = this.filterStatus();
-        if (this.searchQuery()) params.q = this.searchQuery();
+        if (this.filterStatus) params.status = this.filterStatus;
+        if (this.searchQuery) params.q = this.searchQuery;
 
         this.http.get<Order[]>(this.apiUrl, { params, withCredentials: true }).subscribe({
             next: (data) => {

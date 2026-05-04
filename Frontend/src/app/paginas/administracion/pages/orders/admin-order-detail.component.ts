@@ -24,6 +24,7 @@ interface Order {
     customer_email: string;
     customer_telefono: string;
     customer_empresa: string;
+    customer_message?: string;
     items: OrderItem[];
     invoice?: {
         id: number;
@@ -38,7 +39,7 @@ interface Order {
     template: `
     @if (order()) {
         <div class="mb-4">
-            <a routerLink="/administracion/orders" class="text-gray-400 hover:text-white transition-colors flex items-center gap-2">
+            <a routerLink="/admin/orders" class="text-gray-400 hover:text-white transition-colors flex items-center gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
                 </svg>
@@ -65,6 +66,9 @@ interface Order {
                             }
                             @if (order()!.status === 'paid') {
                                 <button (click)="updateStatus('completed')" class="text-sm text-green-400 hover:text-green-300">Marcar como Completado</button>
+                            }
+                            @if (order()!.status === 'pending' || order()!.status === 'paid') {
+                                <button (click)="updateStatus('cancelled')" class="text-sm text-red-400 hover:text-red-300">Cancelar pedido</button>
                             }
                         </div>
                     </div>
@@ -132,6 +136,12 @@ interface Order {
                                 <p class="text-white">{{ order()!.customer_empresa }}</p>
                             </div>
                         }
+                        @if (order()!.customer_message) {
+                            <div>
+                                <p class="text-xs text-gray-500 uppercase">Mensaje</p>
+                                <p class="text-white text-sm leading-relaxed">{{ order()!.customer_message }}</p>
+                            </div>
+                        }
                     </div>
                 </div>
 
@@ -175,7 +185,7 @@ export class AdminOrderDetailComponent implements OnInit {
     order = signal<Order | null>(null);
     generatingInvoice = signal(false);
 
-    private apiUrl = `${environment.apiUrl}/administracion/orders`;
+    private apiUrl = `${environment.apiUrl}/admin/orders`;
 
     ngOnInit() {
         const id = this.route.snapshot.paramMap.get('id');
@@ -210,7 +220,7 @@ export class AdminOrderDetailComponent implements OnInit {
         if (!this.order()) return;
         this.generatingInvoice.set(true);
 
-        this.http.post(`${environment.apiUrl}/administracion/invoices`, { order_id: this.order()!.id }, { withCredentials: true }).subscribe({
+        this.http.post(`${environment.apiUrl}/admin/invoices`, { order_id: this.order()!.id }, { withCredentials: true }).subscribe({
             next: () => {
                 this.generatingInvoice.set(false);
                 this.loadOrder(this.order()!.id.toString());
@@ -224,7 +234,7 @@ export class AdminOrderDetailComponent implements OnInit {
     }
 
     getInvoiceUrl(id: number) {
-        return `${environment.apiUrl}/administracion/invoices/${id}/pdf`;
+        return `${environment.apiUrl}/admin/invoices/${id}/pdf`;
     }
 
     getStatusClass(status: string): string {

@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { CartService } from '../../servicios/cart.service';
 import { AuthService } from '../../servicios/acceso.service';
+import { CartDrawerComponent } from '../../../compartido/components/cart-drawer/cart-drawer.component';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [CommonModule, RouterLink, RouterLinkActive],
+  imports: [CommonModule, RouterLink, RouterLinkActive, CartDrawerComponent],
   templateUrl: './navbar.component.html',
   styles: [`
     .bg-black-90 { background-color: rgba(5, 5, 5, 0.8); }
@@ -22,6 +23,7 @@ export class NavbarComponent {
   isScrolled = signal(false);
   mobileMenuOpen = signal(false);
   userMenuOpen = signal(false);
+  isCartOpen = signal(false);
 
   @HostListener('window:scroll')
   onWindowScroll() {
@@ -34,6 +36,10 @@ export class NavbarComponent {
 
   closeMobileMenu() {
     this.mobileMenuOpen.set(false);
+  }
+
+  toggleCart() {
+    this.isCartOpen.update(v => !v);
   }
 
   toggleUserMenu() {

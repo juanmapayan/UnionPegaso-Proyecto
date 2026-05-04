@@ -78,6 +78,9 @@ $router->add('GET', 'api/portfolio', [$webController, 'indexPortfolio']);
 // Leads
 $router->add('POST', 'api/leads', [$webController, 'createLead']);
 
+// Orders (público — sin login)
+$router->add('POST', 'api/orders', [$webController, 'createOrder']);
+
 $router->add('GET', 'api', function() {
     http_response_code(200);
     echo json_encode(['status' => 'ok', 'message' => 'Union Pegaso API Running']);
@@ -121,6 +124,16 @@ $router->add('DELETE', 'api/admin/portfolio/{id}',    [$adminController, 'delete
 // Reseñas Admin
 $router->add('GET', 'api/admin/reviews', [$adminController, 'indexReviews']);
 $router->add('DELETE', 'api/admin/reviews/{id}', [$adminController, 'deleteReview']);
+
+// Pedidos Admin
+$router->add('GET',   'api/admin/orders',             [$adminController, 'indexOrders']);
+$router->add('GET',   'api/admin/orders/{id}',        [$adminController, 'showOrder']);
+$router->add('PATCH', 'api/admin/orders/{id}/status', [$adminController, 'updateOrderStatus']);
+
+// Facturas Admin
+$router->add('GET',  'api/admin/invoices',          [$adminController, 'indexInvoices']);
+$router->add('POST', 'api/admin/invoices',          [$adminController, 'createInvoice']);
+$router->add('GET',  'api/admin/invoices/{id}/pdf', [$adminController, 'downloadInvoicePdf']);
 
 
 $router->dispatch($_SERVER['REQUEST_METHOD'], $_SERVER['REQUEST_URI']);

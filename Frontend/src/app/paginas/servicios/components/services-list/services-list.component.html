@@ -26,6 +26,23 @@
               </li>
             }
           </ul>
+          <!-- Precio y botón añadir -->
+          <div class="mt-5 pt-4 border-t border-white/10 flex items-center justify-between gap-3">
+            <span class="text-purple-400 font-bold text-base">
+              @if (service.price === 0) { A consultar } @else { {{ service.price | currency:'EUR':'symbol':'1.0-0':'es' }} }
+            </span>
+            <button
+              (click)="addToCart(service)"
+              [class]="isInCart(service.id) ? 'flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-purple-600/20 text-purple-300 border border-purple-600/40 cursor-default' : 'flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-purple-600 text-white hover:bg-purple-700 transition-colors'">
+              @if (isInCart(service.id)) {
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                Añadido
+              } @else {
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                + Añadir
+              }
+            </button>
+          </div>
         </div>
       }
     </div>

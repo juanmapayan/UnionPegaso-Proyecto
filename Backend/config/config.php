@@ -22,5 +22,10 @@ return [
         'enabled'     => (bool)(getenv('MAIL_ENABLED') ?: false),
         'admin_email' => getenv('MAIL_ADMIN_EMAIL') ?: 'unionpegaso@gmail.com',
         'from'        => getenv('MAIL_FROM')        ?: 'noreply@unionpegaso.com',
-    ]
+    ],
+    'resend' => [
+        'api_key'      => getenv('RESEND_API_KEY') ?: '',
+        'from_address' => 'pedidos@unionpegaso.com',
+        'from_name'    => 'Unión Pegaso',
+    ],
 ];

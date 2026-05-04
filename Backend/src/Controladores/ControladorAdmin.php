@@ -455,7 +455,8 @@ class ControladorAdmin {
         }
     }
 
-    public function showOrder($id) {
+    public function showOrder($params) {
+        $id = isset($params['id']) ? (int)$params['id'] : 0;
         $this->requireAdmin();
 
         try {
@@ -485,7 +486,8 @@ class ControladorAdmin {
         }
     }
 
-    public function updateOrderStatus($id) {
+    public function updateOrderStatus($params) {
+        $id = isset($params['id']) ? (int)$params['id'] : 0;
         $this->requireAdmin();
         $data = json_decode(file_get_contents('php://input'), true);
         $status = $data['status'] ?? '';
@@ -573,7 +575,8 @@ class ControladorAdmin {
         }
     }
 
-    public function downloadInvoicePdf($id) {
+    public function downloadInvoicePdf($params) {
+        $id = isset($params['id']) ? (int)$params['id'] : 0;
         $this->requireAdmin();
 
         try {

@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . '/../BaseDatos.php';
+require_once __DIR__ . '/../ResendMailer.php';
 
 class ControladorWeb {
     private $db;
@@ -300,5 +301,114 @@ class ControladorWeb {
         }
 
         echo json_encode($case);
+    }
+
+    // ==========================================
+    // PARTE 6: PEDIDOS (Orders)
+    // ==========================================
+    public function createOrder() {
+        $data = json_decode(file_get_contents('php://input'), true);
+
+        // Validaciones
+        $nombre = trim($data['customer_nombre'] ?? '');
+        $email  = trim($data['customer_email']  ?? '');
+        $telefono = trim($data['customer_telefono'] ?? '');
+        $message  = trim($data['customer_message']  ?? '');
+        $items    = $data['items'] ?? [];
+
+        if ($nombre === '' || strlen($nombre) > 100) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Nombre requerido (máx 100 caracteres)']);
+            return;
+        }
+        if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) > 150) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Email requerido y válido (máx 150 caracteres)']);
+            return;
+        }
+        if (empty($items) || !is_array($items)) {
+            http_response_code(400);
+            echo json_encode(['error' => 'El pedido debe contener al menos un servicio']);
+            return;
+        }
+        foreach ($items as $item) {
+            if (empty($item['name_snapshot']) || !isset($item['price_snapshot']) || !is_numeric($item['price_snapshot']) || (float)$item['price_snapshot'] < 0) {
+                http_response_code(400);
+                echo json_encode(['error' => 'Cada item debe tener name_snapshot y price_snapshot numérico ≥ 0']);
+                return;
+            }
+        }
+
+        // Calcular totales en servidor (no confiar en el cliente)
+        $subtotal = 0;
+        foreach ($items as $item) {
+            $qty = max(1, (int)($item['quantity'] ?? 1));
+            $subtotal += (float)$item['price_snapshot'] * $qty;
+        }
+        $total = $subtotal;
+
+        try {
+            $this->db->beginTransaction();
+
+            $stmt = $this->db->prepare("
+                INSERT INTO orders (user_id, customer_nombre, customer_email, customer_telefono, customer_message, subtotal, total, status)
+                VALUES (?, ?, ?, ?, ?, ?, ?, 'pending')
+            ");
+            $userId = $_SESSION['user_id'] ?? null;
+            $stmt->execute([
+                $userId,
+                $nombre,
+                $email,
+                $telefono ?: null,
+                $message  ?: null,
+                $subtotal,
+                $total
+            ]);
+            $orderId = (int)$this->db->lastInsertId();
+
+            $stmtItem = $this->db->prepare("
+                INSERT INTO order_items (order_id, service_id, name_snapshot, price_snapshot, quantity, line_total)
+                VALUES (?, ?, ?, ?, ?, ?)
+            ");
+            foreach ($items as $item) {
+                $qty       = max(1, (int)($item['quantity'] ?? 1));
+                $price     = (float)$item['price_snapshot'];
+                $serviceId = isset($item['service_id']) ? (int)$item['service_id'] : null;
+                $stmtItem->execute([
+                    $orderId,
+                    $serviceId ?: null,
+                    $item['name_snapshot'],
+                    $price,
+                    $qty,
+                    $price * $qty
+                ]);
+            }
+
+            $this->db->commit();
+
+        } catch (Exception $e) {
+            $this->db->rollBack();
+            http_response_code(500);
+            echo json_encode(['error' => 'Error al crear el pedido. Inténtalo de nuevo.']);
+            return;
+        }
+
+        // Email de confirmación — fallo silencioso (fuera de la transacción)
+        try {
+            $orderData = ['id' => $orderId, 'nombre' => $nombre, 'email' => $email, 'total' => $total];
+            $itemsForEmail = array_map(function($item) {
+                return [
+                    'name_snapshot'  => $item['name_snapshot'],
+                    'price_snapshot' => (float)$item['price_snapshot'],
+                    'quantity'       => max(1, (int)($item['quantity'] ?? 1)),
+                ];
+            }, $items);
+            ResendMailer::sendOrderConfirmation($orderData, $itemsForEmail);
+        } catch (Exception $e) {
+            // La orden ya está guardada; el fallo de email es silencioso
+        }
+
+        http_response_code(201);
+        echo json_encode(['success' => true, 'order_id' => $orderId]);
     }
 }

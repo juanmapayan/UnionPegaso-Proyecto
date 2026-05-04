@@ -3,6 +3,7 @@ import { SectionTitleComponent } from '@compartido';
 import { ServicesService } from '../../servicios.service';
 import { Service } from '../../models/service.model';
 import { CommonModule } from '@angular/common';
+import { CartService } from '../../../../nucleo/servicios/cart.service';
 
 interface ServiceView extends Service {
     icon: string;
@@ -18,6 +19,7 @@ interface ServiceView extends Service {
 })
 export class ServicesListComponent implements OnInit {
   private servicesService = inject(ServicesService);
+  readonly cartService = inject(CartService);
   services = signal<ServiceView[]>([]);
   loading = signal(true);
 
@@ -51,5 +53,13 @@ export class ServicesListComponent implements OnInit {
         this.loading.set(false);
       }
     });
+  }
+
+  isInCart(id: number): boolean {
+    return this.cartService.cartItems().some(item => item.id === id);
+  }
+
+  addToCart(service: ServiceView): void {
+    this.cartService.addToCart(service);
   }
 }
