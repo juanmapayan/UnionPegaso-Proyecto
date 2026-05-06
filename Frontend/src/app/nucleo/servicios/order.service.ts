@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export interface OrderItem {
   service_id: number;
@@ -25,7 +26,7 @@ export interface OrderResponse {
 @Injectable({ providedIn: 'root' })
 export class OrderService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = '/api/orders';
+  private readonly apiUrl = `${environment.apiUrl}/orders`;
 
   createOrder(payload: OrderPayload): Observable<OrderResponse> {
     return this.http.post<OrderResponse>(this.apiUrl, payload, { withCredentials: true });
