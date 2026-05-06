@@ -515,10 +515,10 @@ class ControladorAdmin {
         $this->requireAdmin();
         
         try {
-            $sql = "SELECT i.*, o.total, o.currency, o.customer_nombre, o.customer_email 
+            $sql = "SELECT i.*, o.total, o.currency, o.customer_nombre, o.customer_email
                     FROM invoices i
                     JOIN orders o ON i.order_id = o.id
-                    ORDER BY i.created_at DESC";
+                    ORDER BY i.issued_at DESC";
             $stmt = $this->db->query($sql);
             $invoices = $stmt->fetchAll(PDO::FETCH_ASSOC);
             echo json_encode($invoices);
