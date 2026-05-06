@@ -74,10 +74,10 @@ class ControladorUsuario {
 
             // Insert review with 'approved' status automatically as requested
             $stmt = $this->db->prepare("
-                INSERT INTO reviews (user_id, author_name, author_email, rating, comment, status, related_type, related_id) 
-                VALUES (?, ?, ?, ?, ?, 'approved', 'service', ?)
+                INSERT INTO reviews (user_id, service_id, author_name, author_email, rating, comment, status)
+                VALUES (?, ?, ?, ?, ?, ?, 'approved')
             ");
-            $stmt->execute([$userId, $authorName, $authorEmail, $rating, $comment, $serviceId]);
+            $stmt->execute([$userId, $serviceId, $authorName, $authorEmail, $rating, $comment]);
             
             http_response_code(201);
             echo json_encode(['message' => 'Reseña enviada y publicada correctamente.']);

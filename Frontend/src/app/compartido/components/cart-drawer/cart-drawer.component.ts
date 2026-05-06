@@ -4,6 +4,7 @@ import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { CartService } from '../../../nucleo/servicios/cart.service';
 import { OrderService, OrderPayload } from '../../../nucleo/servicios/order.service';
+import { AuthService } from '../../../nucleo/servicios/acceso.service';
 
 @Component({
   selector: 'app-cart-drawer',
@@ -17,6 +18,7 @@ export class CartDrawerComponent {
 
   private readonly cartService = inject(CartService);
   private readonly orderService = inject(OrderService);
+  private readonly authService = inject(AuthService);
   private readonly fb = inject(FormBuilder);
 
   readonly cartItems = this.cartService.cartItems;
@@ -39,6 +41,10 @@ export class CartDrawerComponent {
   }
 
   goToCheckout() {
+    const user = this.authService.currentUser();
+    if (user) {
+      this.checkoutForm.patchValue({ nombre: user.nombre, email: user.email });
+    }
     this.view.set('checkout');
   }
 
