@@ -65,6 +65,19 @@ class ControladorUsuario {
         }
 
         try {
+            // Verificar que el usuario ha comprado el servicio
+            $stmtCheck = $this->db->prepare("
+                SELECT COUNT(*) FROM order_items oi
+                JOIN orders o ON oi.order_id = o.id
+                WHERE o.user_id = ? AND oi.service_id = ? AND o.status IN ('completed', 'paid')
+            ");
+            $stmtCheck->execute([$userId, $serviceId]);
+            if ((int)$stmtCheck->fetchColumn() === 0) {
+                http_response_code(403);
+                echo json_encode(['error' => 'Solo puedes reseñar servicios que hayas adquirido.']);
+                return;
+            }
+
             // Get user info to populate author_name
             $stmtUser = $this->db->prepare("SELECT nombre, email FROM users WHERE id = ?");
             $stmtUser->execute([$userId]);

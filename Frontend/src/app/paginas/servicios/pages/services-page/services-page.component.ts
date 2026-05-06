@@ -135,7 +135,7 @@ interface Review {
                       </div>
                     }
 
-                    @if (authService.isAuthenticated()) {
+                    @if (hasPurchased(service.id)) {
                       <button
                         (click)="openReviewModal(service.id)"
                         class="w-full text-xs text-purple-400 hover:text-purple-300 border border-purple-500/30 hover:border-purple-500/60 rounded-lg py-2 transition-colors">
@@ -223,6 +223,7 @@ export class ServicesPageComponent implements OnInit {
   loading = signal(true);
   error = signal<string | null>(null);
   addedStates = signal<Map<number, boolean>>(new Map());
+  purchasedServiceIds = signal<Set<number>>(new Set());
 
   reviewsMap = signal<Record<number, Review[]>>({});
   expandedId = signal<number | null>(null);
@@ -239,6 +240,19 @@ export class ServicesPageComponent implements OnInit {
       next: (data) => { this.services.set(data); this.loading.set(false); },
       error: () => { this.error.set('No se pudieron cargar los servicios.'); this.loading.set(false); }
     });
+
+    if (this.authService.isAuthenticated()) {
+      this.authService.getMyServices().subscribe({
+        next: (data: any[]) => {
+          this.purchasedServiceIds.set(new Set(data.map((s: any) => s.id)));
+        },
+        error: () => {}
+      });
+    }
+  }
+
+  hasPurchased(serviceId: number): boolean {
+    return this.purchasedServiceIds().has(serviceId);
   }
 
   addToCart(service: Service) {
