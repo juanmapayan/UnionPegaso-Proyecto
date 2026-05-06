@@ -1,8 +1,7 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
-import { environment } from '../../../../../environments/environment';
+import { AdminApiService } from '../../../../nucleo/servicios';
 
 interface SuccessCase {
     id: number;
@@ -113,7 +112,7 @@ interface SuccessCase {
   `
 })
 export class AdminCasesListComponent implements OnInit {
-    http = inject(HttpClient);
+    private adminApi = inject(AdminApiService);
     fb = inject(FormBuilder);
 
     cases = signal<SuccessCase[]>([]);
@@ -130,14 +129,14 @@ export class AdminCasesListComponent implements OnInit {
         visible: [true]
     });
 
-    private apiUrl = 'http://localhost:8000/api/administracion/cases';
+    private readonly resourcePath = 'cases';
 
     ngOnInit() {
         this.loadCases();
     }
 
     loadCases() {
-        this.http.get<SuccessCase[]>(this.apiUrl, { withCredentials: true }).subscribe({
+        this.adminApi.get<SuccessCase[]>(this.resourcePath).subscribe({
             next: (data) => this.cases.set(data),
             error: (err) => console.error('Error loading cases', err)
         });
@@ -174,8 +173,8 @@ export class AdminCasesListComponent implements OnInit {
         const data = this.caseForm.value;
 
         const request = this.isEditing()
-            ? this.http.patch(`${this.apiUrl}/${this.currentId()}`, data, { withCredentials: true })
-            : this.http.post(this.apiUrl, data, { withCredentials: true });
+            ? this.adminApi.patch(`${this.resourcePath}/${this.currentId()}`, data)
+            : this.adminApi.post(this.resourcePath, data);
 
         request.subscribe({
             next: () => {
@@ -194,7 +193,7 @@ export class AdminCasesListComponent implements OnInit {
     deleteCase(id: number) {
         if (!confirm('¿Estás seguro de eliminar este caso de éxito?')) return;
 
-        this.http.delete(`${this.apiUrl}/${id}`, { withCredentials: true }).subscribe({
+        this.adminApi.delete(`${this.resourcePath}/${id}`).subscribe({
             next: () => this.loadCases(),
             error: (err) => {
                 console.error('Error deleting case', err);

@@ -26,20 +26,20 @@ export class AdminApiService {
    */
   private adminBaseUrl = `${environment.apiUrl}/admin`;
 
-  get<T>(path: string, options: { params?: HttpParams; withCredentials?: boolean } = {}): Observable<T> {
-    return this.http.get<T>(`${this.adminBaseUrl}/${path}`, options);
+  get<T>(path: string, options: { params?: HttpParams } = {}): Observable<T> {
+    return this.http.get<T>(`${this.adminBaseUrl}/${path}`, { ...options, withCredentials: true });
   }
 
-  post<T>(path: string, body: any, options: { withCredentials?: boolean } = {}): Observable<T> {
-    return this.http.post<T>(`${this.adminBaseUrl}/${path}`, body, options);
+  post<T>(path: string, body: any): Observable<T> {
+    return this.http.post<T>(`${this.adminBaseUrl}/${path}`, body, { withCredentials: true });
   }
 
-  patch<T>(path: string, body: any, options: { withCredentials?: boolean } = {}): Observable<T> {
-    return this.http.patch<T>(`${this.adminBaseUrl}/${path}`, body, options);
+  patch<T>(path: string, body: any): Observable<T> {
+    return this.http.patch<T>(`${this.adminBaseUrl}/${path}`, body, { withCredentials: true });
   }
 
-  delete<T>(path: string, options: { withCredentials?: boolean } = {}): Observable<T> {
-    return this.http.delete<T>(`${this.adminBaseUrl}/${path}`, options);
+  delete<T>(path: string): Observable<T> {
+    return this.http.delete<T>(`${this.adminBaseUrl}/${path}`, { withCredentials: true });
   }
 }
 

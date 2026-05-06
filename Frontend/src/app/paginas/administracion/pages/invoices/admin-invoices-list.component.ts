@@ -1,6 +1,6 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
+import { AdminApiService } from '../../../../nucleo/servicios';
 import { environment } from '../../../../../environments/environment';
 
 interface Invoice {
@@ -68,11 +68,11 @@ interface Invoice {
   `
 })
 export class AdminInvoicesListComponent implements OnInit {
-    http = inject(HttpClient);
+    private adminApi = inject(AdminApiService);
     invoices = signal<Invoice[]>([]);
     loading = signal(false);
 
-    private apiUrl = `${environment.apiUrl}/administracion/invoices`;
+    private readonly resourcePath = 'invoices';
 
     ngOnInit() {
         this.loadInvoices();
@@ -80,7 +80,7 @@ export class AdminInvoicesListComponent implements OnInit {
 
     loadInvoices() {
         this.loading.set(true);
-        this.http.get<Invoice[]>(this.apiUrl, { withCredentials: true }).subscribe({
+        this.adminApi.get<Invoice[]>(this.resourcePath).subscribe({
             next: (data) => {
                 this.invoices.set(data);
                 this.loading.set(false);
@@ -93,6 +93,6 @@ export class AdminInvoicesListComponent implements OnInit {
     }
 
     getInvoiceUrl(id: number) {
-        return `${this.apiUrl}/${id}/pdf`;
+        return `${environment.apiUrl}/admin/${this.resourcePath}/${id}/pdf`;
     }
 }
