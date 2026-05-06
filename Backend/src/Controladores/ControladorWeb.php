@@ -249,6 +249,29 @@ class ControladorWeb {
         }
     }
 
+    public function indexServiceReviews($params) {
+        $id = (int)($params['id'] ?? 0);
+        if ($id <= 0) {
+            http_response_code(400);
+            echo json_encode(['error' => 'ID de servicio inválido']);
+            return;
+        }
+
+        try {
+            $stmt = $this->db->prepare("
+                SELECT author_name, rating, comment, created_at
+                FROM reviews
+                WHERE service_id = ? AND status = 'approved'
+                ORDER BY created_at DESC
+            ");
+            $stmt->execute([$id]);
+            echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC));
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode(['error' => 'Error al obtener reseñas']);
+        }
+    }
+
     // ==========================================
     // PARTE 5: CASOS DE ÉXITO (Anterior SuccessCaseController)
     // ==========================================

@@ -70,6 +70,7 @@ $webController = new ControladorWeb();
 // Servicios
 $router->add('GET', 'api/services', [$webController, 'indexServices']);
 $router->add('GET', 'api/services/{id}', [$webController, 'showService']);
+$router->add('GET', 'api/services/{id}/reviews', [$webController, 'indexServiceReviews']);
 // Casos de éxito
 $router->add('GET', 'api/cases', [$webController, 'indexSuccessCases']);
 $router->add('GET', 'api/cases/{slug}', [$webController, 'showSuccessCase']);
